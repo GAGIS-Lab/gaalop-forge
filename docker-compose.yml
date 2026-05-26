@@ -1,0 +1,8 @@
+services:
+  gaalop-vue-spring-compiler:
+    build:
+      context: .
+    image: gacrac/gaalop-vue-spring-compiler:1.0
+    container_name: gaalop-vue-spring-compiler
+    ports:
+      - "18080:8080"

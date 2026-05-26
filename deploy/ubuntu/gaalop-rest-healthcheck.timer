@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Gaalop REST health check every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+AccuracySec=10s
+Unit=gaalop-rest-healthcheck.service
+
+[Install]
+WantedBy=timers.target

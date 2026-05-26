@@ -55,6 +55,7 @@
         <module>starter</module>
         <module>cli</module>
         <module>gui</module>
+        <module>gaalop-rest</module>
 
         <!-- testbenches -->
         <module>testbenchTbaGapp</module>

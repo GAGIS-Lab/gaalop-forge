@@ -1,0 +1,14 @@
+.git
+.idea
+.settings
+**/target
+**/node_modules
+frontend/dist
+frontend/*.log
+frontend/*.pid
+.playwright-cli
+output
+**/*.iml
+*.log
+*.tmp
+*.bak

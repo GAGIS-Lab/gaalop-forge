@@ -1,0 +1,19 @@
+[Unit]
+Description=Gaalop REST backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=GACRAC
+Group=GACRAC
+WorkingDirectory=/home/GACRAC
+ExecStart=/usr/bin/java -Xms2g -Xmx2g -jar /home/GACRAC/gaalop-rest-1.0.0.jar --server.port=8080
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

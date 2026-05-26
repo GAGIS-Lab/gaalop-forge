@@ -1,0 +1,6 @@
+[Unit]
+Description=Check Gaalop REST health and restart it when unhealthy
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/gaalop-rest-healthcheck.sh
