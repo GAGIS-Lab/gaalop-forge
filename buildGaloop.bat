@@ -1,3 +1,0 @@
-
-mvn clean package
-pause

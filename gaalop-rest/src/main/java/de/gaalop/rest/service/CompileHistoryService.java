@@ -29,7 +29,7 @@ public class CompileHistoryService {
 
     public CompileHistoryService(
             ObjectMapper objectMapper,
-            @Value("${gaalop.compile-history.enabled:true}") boolean enabled,
+            @Value("${gaalop.compile-history.enabled:false}") boolean enabled,
             @Value("${gaalop.compile-history.path:compile-history}") String historyPath
     ) {
         this.objectMapper = objectMapper;

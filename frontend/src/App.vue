@@ -647,7 +647,7 @@ function handleMultivectorInput() {
 
 const optimizeScriptSymbols = computed(() => extractScriptSymbols(form.script.optimizeCode));
 const optimizeScriptMacros = computed(() => extractScriptMacros(form.script.optimizeCode));
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://gacrac.gagis.cn:8080";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
 
 function buildRequestBody() {
   return {
@@ -737,7 +737,7 @@ function buildVisualizationDocument(coreScript) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://gaalopweb.esa.informatik.tu-darmstadt.de/gaalopweb/lib/ganja/ganja.js"><\/script>
+    <script src="/ganja.js"><\/script>
     <style>
       :root {
         color-scheme: light;

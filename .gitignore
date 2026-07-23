@@ -6,4 +6,13 @@ pom.xml.next
 release.properties
 testbenchTbaGapp/src/test/java/de/gaalop/testbenchTbaGapp/gapp/generatedTests/
 .idea/
+.project
+.settings/
+.playwright-cli/
+output/
+compile-history/
+logs/
+.env
+.env.*
+!.env.example
 *.iml

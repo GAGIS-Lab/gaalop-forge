@@ -1,8 +1,12 @@
 services:
-  gaalop-vue-spring-compiler:
+  gaalop-forge:
     build:
       context: .
-    image: gacrac/gaalop-vue-spring-compiler:1.0
-    container_name: gaalop-vue-spring-compiler
+    image: gagislab/gaalop-forge:1.0.0
+    container_name: gaalop-forge
     ports:
       - "18080:8080"
+    environment:
+      GAALOP_SWAGGER_USERNAME: "${GAALOP_SWAGGER_USERNAME:-GACRAC}"
+      GAALOP_SWAGGER_PASSWORD: "${GAALOP_SWAGGER_PASSWORD:-GAGIS}"
+      GAALOP_COMPILE_HISTORY_ENABLED: "${GAALOP_COMPILE_HISTORY_ENABLED:-false}"

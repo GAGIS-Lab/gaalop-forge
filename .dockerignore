@@ -1,4 +1,6 @@
 .git
+.agents
+.codex
 .idea
 .settings
 **/target
@@ -8,7 +10,12 @@ frontend/*.log
 frontend/*.pid
 .playwright-cli
 output
+compile-history
+logs
+docs
 **/*.iml
+*.docx
+*.pdf
 *.log
 *.tmp
 *.bak

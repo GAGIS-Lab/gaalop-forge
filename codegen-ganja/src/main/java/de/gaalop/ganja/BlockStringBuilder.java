@@ -135,7 +135,7 @@ public class BlockStringBuilder {
                 + "    <head>\n"
                 + "        <meta charset=\"utf-8\">\n"
                 + "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                + "        <script src=\"https://gaalopweb.esa.informatik.tu-darmstadt.de/gaalopweb/lib/ganja/ganja.js\"></script>\n"
+                + "        <script src=\"ganja.js\"></script>\n"
                 + "        <style>\n"
                 + "            body {\n"
                 + "                display: flex;\n"

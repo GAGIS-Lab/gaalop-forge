@@ -1,2 +1,0 @@
-mvn package
-pause
