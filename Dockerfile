@@ -1,5 +1,9 @@
 FROM ubuntu:22.04 AS qra-build
 
+ARG UBUNTU_MIRROR=""
+RUN if [ -n "$UBUNTU_MIRROR" ]; then \
+        sed -i "s|http://archive.ubuntu.com/ubuntu|$UBUNTU_MIRROR|g; s|http://security.ubuntu.com/ubuntu|$UBUNTU_MIRROR|g" /etc/apt/sources.list; \
+    fi
 RUN apt-get -o Acquire::Retries=5 update \
     && apt-get -o Acquire::Retries=5 install -y --no-install-recommends cmake g++ make \
     && rm -rf /var/lib/apt/lists/*
