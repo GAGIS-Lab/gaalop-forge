@@ -17,7 +17,8 @@ stop_processes() {
 trap stop_processes INT TERM EXIT
 
 java -jar /app/gaalop-rest.jar \
-  --server.port=18080 \
+    --server.port=18080 \
+    --server.servlet.context-path=/ \
   --gaalop.maxima.command=/app/tools/maxima/bin/maxima &
 JAVA_PID="$!"
 
