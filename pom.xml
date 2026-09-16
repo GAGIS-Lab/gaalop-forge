@@ -28,6 +28,7 @@
 	<!-- middle end -->
         <module>tba</module>
         <module>gapp</module>
+        <module>garamon</module>
 
 	<!-- back end -->
         <module>codegen-cpp</module>

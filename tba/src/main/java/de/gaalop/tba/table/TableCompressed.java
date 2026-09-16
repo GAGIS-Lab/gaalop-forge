@@ -80,6 +80,9 @@ public class TableCompressed implements TableReaderIO {
         int size = product.getBlades().size();
         out.write(size, bitCount);
         for (BladeRef bR: product.getBlades()) {
+            if (Math.abs(bR.getPrefactor()) != 1) {
+                throw new IllegalArgumentException("Legacy compressed tables support only +/-1 coefficients; use direct products for QCA.");
+            }
             out.write((bR.getPrefactor() < 0) ? 1 : 0, 1);
             out.write(bR.getIndex(), dimension);
         }

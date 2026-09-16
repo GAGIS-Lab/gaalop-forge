@@ -134,9 +134,9 @@ public class MvExpressionsBuilder extends EmptyControlFlowVisitor implements Exp
                 Expression prodExpr = new Multiplication(l.getValue(), r.getValue());
                 Multivector prodMv = usedAlgebra.getProduct(typeProduct, l.getKey(), r.getKey());
 
-                TreeMap<Integer, Byte> prod = prodMv.getValueArr(algebra);
+                TreeMap<Integer, Float> prod = prodMv.getValueArr(algebra);
 
-                for (Entry<Integer, Byte> blade: prod.entrySet()) {
+                for (Entry<Integer, Float> blade: prod.entrySet()) {
                     Expression prodExpri = new Multiplication(prodExpr, new FloatConstant(blade.getValue()));
                         
                     if (result.bladeExpressions.containsKey(blade.getKey())) {

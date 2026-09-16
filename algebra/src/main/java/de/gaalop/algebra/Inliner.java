@@ -1,5 +1,6 @@
 package de.gaalop.algebra;
 
+import de.gaalop.OptimizationException;
 import de.gaalop.cfg.*;
 import de.gaalop.dfg.Expression;
 import de.gaalop.dfg.FloatConstant;
@@ -42,10 +43,12 @@ public class Inliner extends EmptyControlFlowVisitor {
         this.graph = graph;
     }
 
-    public static void inline(ControlFlowGraph graph, HashMap<StringIntContainer, Macro> macros) {
+    public static void inline(ControlFlowGraph graph, HashMap<StringIntContainer, Macro> macros) throws OptimizationException {
         Inliner inliner = new Inliner(macros, graph);
-        while (!inliner.error && MacroCallCounter.countMacroCallsInGraph(graph)>0)
+        while (inliner.error == null && MacroCallCounter.countMacroCallsInGraph(graph)>0)
             graph.accept(inliner);
+        if (inliner.error != null)
+            throw inliner.error;
     }
 
     @Override
@@ -98,13 +101,13 @@ public class Inliner extends EmptyControlFlowVisitor {
 
     private SequentialNode curNode;
 
-    private boolean error = false;
+    private OptimizationException error;
 
     @Override
     public void visit(AssignmentNode node) {
         curNode = node;
         
-        while (containsMacroCall(node.getValue()) && !error) {
+        while (containsMacroCall(node.getValue()) && error == null) {
             replacer.result = null;
             node.getValue().accept(replacer);
             if (replacer.result != null) 
@@ -136,6 +139,8 @@ public class Inliner extends EmptyControlFlowVisitor {
 
         @Override
         public void visit(MacroCall macroExpr) {
+            if (error != null)
+                return;
             String macroCallName = macroExpr.getName();
             //check if this macro call is a builtin function
             if ("coefficient".equals(macroCallName.toLowerCase())) {
@@ -154,9 +159,25 @@ public class Inliner extends EmptyControlFlowVisitor {
 
             StringIntContainer container = new StringIntContainer(macroCallName, macroExpr.getArguments().size());
             if (!macros.containsKey(container)) {
-                System.err.println("Macro "+macroCallName+"(with "+macroExpr.getArguments().size()+" parameters) is not defined!");
-                error = true; //escape endless loop!
                 result = null;
+                // Only standalone, unknown function calls can be handed to a renderer.
+                // A macro used as a value must be defined before later compiler stages run.
+                boolean rendererCall = curNode instanceof ExpressionStatement
+                        && ((ExpressionStatement) curNode).getExpression() == macroExpr
+                        && !"*".equals(macroCallName);
+                for (StringIntContainer knownMacro : macros.keySet()) {
+                    if (knownMacro.getName().equals(macroCallName))
+                        rendererCall = false;
+                }
+                if (!rendererCall) {
+                    String message = "*".equals(macroCallName)
+                            ? "The unary dual operator '*' is not defined for algebra '" + graph.algebraName
+                                    + "'. Define a one-argument Dual macro or use an algebra that provides one."
+                            : "Macro '" + macroCallName + "' with " + macroExpr.getArguments().size()
+                                    + " arguments is not defined for algebra '" + graph.algebraName + "'.";
+                    error = new OptimizationException(message, graph);
+                    return;
+                }
                 delete = true;
                 graph.unknownMacros.add(new UnknownMacroCall(macroExpr, currentColorNode));
                 //make all non-variable arguments to variables

@@ -1,0 +1,128 @@
+// === Basic Definitions ===
+//  Imaginary unit
+i = er1*er2;
+
+// Witt basis
+f1 = 0.5*(e1 + i*e7);
+f1T = 0.5*(e1 - i*e7);
+f2 = 0.5*(e2 + i*e8);
+f2T = 0.5*(e2 - i*e8);
+f3 = 0.5*(e3 + i*e9);
+f3T = 0.5*(e3 - i*e9);
+f4 = 0.5*(e4 + i*e10);
+f4T = 0.5*(e4 - i*e10);
+f5 = 0.5*(e5 + i*e11);
+f5T = 0.5*(e5 - i*e11);
+f6 = 0.5*(e6 + i*e12);
+f6T = 0.5*(e6 - i*e12);
+
+// Element I (Identity)
+Id = f1*f1T*f2*f2T*f3*f3T*f4*f4T*f5*f5T*f6*f6T;
+
+// === Ket Basis Vectors ===
+ket000000 = 1*Id;
+ket000001 = f6T*Id;
+ket000010 = f5T*Id;
+ket000011 = f5T*f6T*Id;
+ket000100 = f4T*Id;
+ket000101 = f4T*f6T*Id;
+ket000110 = f4T*f5T*Id;
+ket000111 = f4T*f5T*f6T*Id;
+ket001000 = f3T*Id;
+ket001001 = f3T*f6T*Id;
+ket001010 = f3T*f5T*Id;
+ket001011 = f3T*f5T*f6T*Id;
+ket001100 = f3T*f4T*Id;
+ket001101 = f3T*f4T*f6T*Id;
+ket001110 = f3T*f4T*f5T*Id;
+ket001111 = f3T*f4T*f5T*f6T*Id;
+ket010000 = f2T*Id;
+ket010001 = f2T*f6T*Id;
+ket010010 = f2T*f5T*Id;
+ket010011 = f2T*f5T*f6T*Id;
+ket010100 = f2T*f4T*Id;
+ket010101 = f2T*f4T*f6T*Id;
+ket010110 = f2T*f4T*f5T*Id;
+ket010111 = f2T*f4T*f5T*f6T*Id;
+ket011000 = f2T*f3T*Id;
+ket011001 = f2T*f3T*f6T*Id;
+ket011010 = f2T*f3T*f5T*Id;
+ket011011 = f2T*f3T*f5T*f6T*Id;
+ket011100 = f2T*f3T*f4T*Id;
+ket011101 = f2T*f3T*f4T*f6T*Id;
+ket011110 = f2T*f3T*f4T*f5T*Id;
+ket011111 = f2T*f3T*f4T*f5T*f6T*Id;
+ket100000 = f1T*Id;
+ket100001 = f1T*f6T*Id;
+ket100010 = f1T*f5T*Id;
+ket100011 = f1T*f5T*f6T*Id;
+ket100100 = f1T*f4T*Id;
+ket100101 = f1T*f4T*f6T*Id;
+ket100110 = f1T*f4T*f5T*Id;
+ket100111 = f1T*f4T*f5T*f6T*Id;
+ket101000 = f1T*f3T*Id;
+ket101001 = f1T*f3T*f6T*Id;
+ket101010 = f1T*f3T*f5T*Id;
+ket101011 = f1T*f3T*f5T*f6T*Id;
+ket101100 = f1T*f3T*f4T*Id;
+ket101101 = f1T*f3T*f4T*f6T*Id;
+ket101110 = f1T*f3T*f4T*f5T*Id;
+ket101111 = f1T*f3T*f4T*f5T*f6T*Id;
+ket110000 = f1T*f2T*Id;
+ket110001 = f1T*f2T*f6T*Id;
+ket110010 = f1T*f2T*f5T*Id;
+ket110011 = f1T*f2T*f5T*f6T*Id;
+ket110100 = f1T*f2T*f4T*Id;
+ket110101 = f1T*f2T*f4T*f6T*Id;
+ket110110 = f1T*f2T*f4T*f5T*Id;
+ket110111 = f1T*f2T*f4T*f5T*f6T*Id;
+ket111000 = f1T*f2T*f3T*Id;
+ket111001 = f1T*f2T*f3T*f6T*Id;
+ket111010 = f1T*f2T*f3T*f5T*Id;
+ket111011 = f1T*f2T*f3T*f5T*f6T*Id;
+ket111100 = f1T*f2T*f3T*f4T*Id;
+ket111101 = f1T*f2T*f3T*f4T*f6T*Id;
+ket111110 = f1T*f2T*f3T*f4T*f5T*Id;
+ket111111 = f1T*f2T*f3T*f4T*f5T*f6T*Id;
+
+// === Quantum Gates ===
+
+// Hadamard Gates
+h1 = (1/sqrt(2))*(f1*f1T + f1 + f1T - f1T*f1);
+h2 = (1/sqrt(2))*(f2*f2T + f2 + f2T - f2T*f2);
+h3 = (1/sqrt(2))*(f3*f3T + f3 + f3T - f3T*f3);
+h4 = (1/sqrt(2))*(f4*f4T + f4 + f4T - f4T*f4);
+h5 = (1/sqrt(2))*(f5*f5T + f5 + f5T - f5T*f5);
+h6 = (1/sqrt(2))*(f6*f6T + f6 + f6T - f6T*f6);
+
+// NOT Gates (Pauli-X)
+not1 = f1 + f1T;
+not2 = f2 + f2T;
+not3 = f3 + f3T;
+not4 = f4 + f4T;
+not5 = f5 + f5T;
+not6 = f6 + f6T;
+
+// Multi-Controlled Z (flips phase of |11...1>)
+mcz = (f1*f1T + f1T*f1*(f2*f2T + f2T*f2*(f3*f3T + f3T*f3*(f4*f4T + f4T*f4*(f5*f5T + f5T*f5*(f6*f6T - f6T*f6))))));
+
+// === Diffusion Operator ===
+diffusion = h1*h2*h3*h4*h5*h6*not1*not2*not3*not4*not5*not6 * mcz * not6*not5*not4*not3*not2*not1*h6*h5*h4*h3*h2*h1;
+
+// === Oracle Operator ===
+oracle = (not1*not3*not4*not5 * mcz * not5*not4*not3*not1);
+
+// === Grover Operator ===
+grover = diffusion * oracle;
+
+// Iterations needed: 5
+full_operator = grover*grover*grover*grover*grover;
+
+// === Algorithm Execution ===
+// superposition
+psi = h1*h2*h3*h4*h5*h6*Id;
+
+res = full_operator * psi;
+
+// Result
+?res;

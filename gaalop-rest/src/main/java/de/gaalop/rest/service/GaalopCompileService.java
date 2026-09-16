@@ -52,6 +52,10 @@ public class GaalopCompileService {
         CompileRequest safeRequest = request == null ? new CompileRequest() : request;
         ScriptInput script = safeRequest.getScript() == null ? new ScriptInput() : safeRequest.getScript();
         CodegenPlugin codegen = resolveCodegen(safeRequest);
+        if (safeRequest.getAlgebraPlugins() == AlgebraPlugin.ALGEBRA_QRA) {
+            return compileQra(safeRequest, script, codegen);
+        }
+        validateQcaRequest(safeRequest, codegen);
 
         String optimizeResult = "";
         OutputMode outputMode = safeRequest.getOutputMode() == null ? OutputMode.CODE_ONLY : safeRequest.getOutputMode();
@@ -61,6 +65,13 @@ public class GaalopCompileService {
         }
 
         String visualizationCode = "";
+        if (safeRequest.getAlgebraPlugins() == AlgebraPlugin.ALGEBRA_QCA && shouldGenerateVisualization(safeRequest, codegen)) {
+            int n = safeRequest.getAlgebraDimension() == null ? 1 : safeRequest.getAlgebraDimension();
+            CompileResponse response = CompileResponse.success(optimizeResult, "");
+            response.setQuantumResults(QcaStateEvaluator.evaluate(n, buildScript(script, true)));
+            compileHistoryService.recordSuccess(safeRequest, response);
+            return response;
+        }
         if (shouldGenerateVisualization(safeRequest, codegen)) {
             Set<OutputFile> visualizationFiles = compileFiles(safeRequest, script, CodegenPlugin.GANJA, true);
             visualizationCode = extractVisualizationCore(selectGeneratedText(visualizationFiles, true));
@@ -103,6 +114,7 @@ public class GaalopCompileService {
                 createOptimizationStrategy(codegen, tbaPlugin),
                 createCodeGenerator(codegen),
                 algebra,
+                request.getAlgebraDimension() == null ? 1 : request.getAlgebraDimension(),
                 isBundledAlgebra(algebra),
                 algebraPlugin.getAdditionalBaseDirectory()
         );
@@ -110,6 +122,68 @@ public class GaalopCompileService {
         String functionName = normalizeFunctionName(script.getFunctionName());
         InputFile input = new InputFile(functionName + ".clu", buildScript(script, includeVisualization));
         return facade.compile(input);
+    }
+
+    private CompileResponse compileQra(CompileRequest request, ScriptInput script, CodegenPlugin codegen)
+            throws CompilationException {
+        Integer n = request.getAlgebraDimension();
+        if (n == null || n < 2 || n > 9) throw new IllegalArgumentException("QRA requires an integer qubit count from 2 to 9.");
+        OptimizationOptions options = request.getOptimization();
+        if (options != null && (Boolean.TRUE.equals(options.getCse()) || Boolean.TRUE.equals(options.getMaxima()))) {
+            throw new IllegalArgumentException("QRA uses native numeric evaluation; CSE and Maxima are not supported on this path.");
+        }
+        if (codegen != CodegenPlugin.JAVA && codegen != CodegenPlugin.CPP && codegen != CodegenPlugin.PYTHON) {
+            throw new IllegalArgumentException("QRA numeric code generation supports JAVA, CPP and PYTHON.");
+        }
+        boolean visualize = shouldGenerateVisualization(request, codegen);
+        de.gaalop.garamon.Plugin plugin = new de.gaalop.garamon.Plugin();
+        plugin.setZeroEpsilon(0.0);
+        de.gaalop.garamon.qra.GaramonQraOptimizationStrategy strategy =
+                new de.gaalop.garamon.qra.GaramonQraOptimizationStrategy(plugin);
+        strategy.setProjectStates(visualize);
+        de.gaalop.algebra.Plugin algebra = new de.gaalop.algebra.Plugin();
+        // Numeric execution requires assigned inputs, even in Code Only mode.
+        StringBuilder source = new StringBuilder();
+        appendBlock(source, script.getVariableAssignments());
+        appendBlock(source, script.getOptimizeCode());
+        if (visualize) {
+            Object raw = script.getMultivectorsVisualized();
+            if (isVisualizationScript(raw)) appendBlock(source, String.valueOf(raw));
+            else for (String name : normalizeVisualizedMultivectors(raw)) source.append(':').append(name).append(";\n");
+        }
+        VisualCodeInserterStrategy outputs = graph -> {
+            java.util.Set<String> selectedStates = new java.util.HashSet<String>();
+            for (de.gaalop.cfg.ExpressionStatement statement : graph.visualizerExpressions) {
+                if (!(statement.getExpression() instanceof de.gaalop.dfg.Variable)) {
+                    throw new IllegalArgumentException("Assign a visualization expression to a variable before marking it for output.");
+                }
+                statement.insertAfter(new de.gaalop.cfg.StoreResultNode(graph,
+                        (de.gaalop.dfg.Variable) statement.getExpression()));
+                selectedStates.add(((de.gaalop.dfg.Variable) statement.getExpression()).getName());
+            }
+            strategy.setProjectedVariables(selectedStates);
+        };
+        CompilerFacade facade = new CompilerFacade(new de.gaalop.clucalc.input.Plugin().createCodeParser(),
+                new de.gaalop.globalSettings.Plugin().createGlobalSettingsStrategy(), outputs,
+                algebra.createAlgebraStrategy(), strategy, createCodeGenerator(codegen),
+                "qra" + n, n, true, algebra.getAdditionalBaseDirectory());
+        Set<OutputFile> files = facade.compile(new InputFile(normalizeFunctionName(script.getFunctionName()) + ".clu", source.toString()));
+        String code = request.getOutputMode() == OutputMode.VISUALIZATION_ONLY ? "" : selectGeneratedText(files, false);
+        CompileResponse response = CompileResponse.success(code, "");
+        if (visualize) response.setQuantumResults(strategy.getQuantumResults());
+        compileHistoryService.recordSuccess(request, response);
+        return response;
+    }
+
+    private void validateQcaRequest(CompileRequest request, CodegenPlugin codegen) {
+        if (request.getAlgebraPlugins() != AlgebraPlugin.ALGEBRA_QCA) return;
+        int dimension = request.getAlgebraDimension() == null ? 1 : request.getAlgebraDimension();
+        if (dimension < 1 || dimension > 3) {
+            throw new IllegalArgumentException("QCA currently supports 1 to 3 qubits in the web service.");
+        }
+        if (codegen == CodegenPlugin.GANJA || codegen == CodegenPlugin.VISUALIZER || codegen == CodegenPlugin.VIS2D) {
+            throw new IllegalArgumentException("QCA quantum visualization uses state probabilities, not a geometric visualization code generator.");
+        }
     }
 
     private de.gaalop.OptimizationStrategy createOptimizationStrategy(CodegenPlugin codegen, de.gaalop.tba.Plugin tbaPlugin) {

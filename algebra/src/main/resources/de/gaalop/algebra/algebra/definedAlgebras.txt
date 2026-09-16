@@ -9,3 +9,4 @@ gac;geometric algebra for conics
 dcga;double conformal geometric algebra
 ccga;cubic CGA
 qga;quantum bit geometric algebra
+qca;quantum computing algebra

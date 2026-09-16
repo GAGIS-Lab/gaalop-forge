@@ -1,0 +1,27 @@
+<namespace>
+qra@N@
+</namespace>
+<dimension>
+@DIM@
+</dimension>
+<metric>
+@METRIC@
+</metric>
+<basis vector name>
+@BASIS@
+</basis vector name>
+<metric decomposition refinement>
+true
+</metric decomposition refinement>
+<metric decomposition numerical cleanup>
+true
+</metric decomposition numerical cleanup>
+<metric decomposition numerical cleanup espilon>
+0.0000001
+</metric decomposition numerical cleanup espilon>
+<max dimension precomputed products>
+32
+</max dimension precomputed products>
+<max dimension basis accessor>
+32
+</max dimension basis accessor>

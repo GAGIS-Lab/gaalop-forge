@@ -1,0 +1,5 @@
+FROM ubuntu:24.04
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    cmake g++ make openjdk-17-jre-headless && rm -rf /var/lib/apt/lists/*
+WORKDIR /work
+CMD ["sh", "/src/test-linux.sh"]

@@ -1,5 +1,6 @@
 package de.gaalop.rest.api;
 
+import jakarta.servlet.ServletContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Info;
@@ -17,6 +18,12 @@ import java.util.Map;
 
 @Configuration
 public class OpenApiConfig {
+
+    private final ServletContext servletContext;
+
+    public OpenApiConfig(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
 
     @Bean
     public GroupedOpenApi englishApi() {
@@ -116,7 +123,7 @@ public class OpenApiConfig {
 
     private void useSameOriginServer(OpenAPI openApi) {
         openApi.setServers(java.util.List.of(new Server()
-                .url("/")
+                .url(servletContext.getContextPath().isEmpty() ? "/" : servletContext.getContextPath())
                 .description("Same origin as Swagger UI")));
     }
 
@@ -198,6 +205,7 @@ public class OpenApiConfig {
                 "CompileRequest", Map.of(
                         "_type", "GAALOPScript compilation request.",
                         "algebraPlugins", "Algebra space plugin.",
+                        "algebraDimension", "QCA qubit count, 1 to 3; defaults to 1. Ignored for fixed algebras.",
                         "codegenPlugins", "Target code generator.",
                         "outputMode", "Controls whether code, visualization, or both are returned.",
                         "visualizationEnabled", "Enables visualization output.",
@@ -264,6 +272,7 @@ public class OpenApiConfig {
                 "CompileRequest", Map.of(
                         "_type", "GAALOPScript-Kompilierungsanfrage.",
                         "algebraPlugins", "Algebra-Raum-Plugin.",
+                        "algebraDimension", "QCA-Qubitanzahl, 1 bis 3; Standardwert 1. Bei festen Algebren ignoriert.",
                         "codegenPlugins", "Codegenerator für die Zielsprache.",
                         "outputMode", "Steuert, ob Code, Visualisierung oder beides zurückgegeben wird.",
                         "visualizationEnabled", "Aktiviert die Visualisierungsausgabe.",

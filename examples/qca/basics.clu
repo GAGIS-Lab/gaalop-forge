@@ -1,0 +1,11 @@
+// Select QCA with at least 2 qubits. Generate code without visualization.
+?half = f1.f1T;
+?anti = f1*f1T + f1T*f1;
+?nil = f2*f2;
+?cross = f1*f2T + f2T*f1;
+projector = f1*f1T;
+?idempotence = projector*projector - projector;
+// Upstream fix 11da0993: ei1^2 = ei2^2 = +1.
+?sign = ei2*ei2;
+// Their geometric product squares to -1.
+?imaginarySquare = (ei1*ei2)*(ei1*ei2);

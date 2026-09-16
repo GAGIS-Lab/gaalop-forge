@@ -1,5 +1,7 @@
 package de.gaalop.dfg;
 
+import java.util.Objects;
+
 /**
  * This class represents a base vector of the algebra. The base vectors are usually indexed from 1 to n where n is the
  * dimension of the algebra. In order to support other base vectors, e.g. for the conformal geometric algebra with
@@ -9,97 +11,112 @@ package de.gaalop.dfg;
  */
 public final class BaseVector extends Expression {
 
-	/** We use a string in order to support indices like einf. */
-	private String index;
+    private String indexName;
+    private String baseName;
 
-	/**
-	 * Constructs a new Base Vector with the given index. The index is not restricted to a subset of values but should
-	 * not be negative.
-	 * 
-	 * @param index The index of this base vector.
-	 */
-	public BaseVector(int index) {
-		this.index = Integer.toString(index);
-	}
+    /**
+     * Constructs a new Base Vector with the given index. The index is not
+     * restricted to a subset of values but should not be negative.
+     *
+     * @param index The index of this base vector.
+     */
+    public BaseVector(int index) {
+        this.baseName = "e";
+        this.indexName = Integer.toString(index);
+    }
 
-	/**
-	 * Constructs a new Base Vector with the given string index.
-	 * 
-	 * @param index index of the base vector, e.g. inf for e<sub>&#8734;</sub>
-	 */
-	public BaseVector(String index) {
-		this.index = index;
-	}
+    /**
+     * Constructs a new Base Vector with the given string index.
+     *
+     * @param index index of the base vector, e.g. inf for e<sub>&#8734;</sub>
+     */
+    public BaseVector(String baseName, String indexName) {
+        this.baseName = baseName;
+        this.indexName = indexName;
+    }
 
-	/**
-	 * Gets the index of this base vector.
-	 * 
-	 * @return An integer between 1 and the dimension of the underlying algebra. Can be 0 or inf, too.
-	 */
-	public String getIndex() {
-		return index;
-	}
+    /**
+     * Gets the index of this base vector.
+     *
+     * @return An integer between 1 and the dimension of the underlying algebra. Can be 0 or inf, too.
+     */
+    /** Legacy constructor for e-prefixed basis vectors. */
+    public BaseVector(String index) {
+        this("e", index);
+    }
 
-	@Override
-	public Expression copy() {
-            return new BaseVector(this.index);
-	}
+    public String getIndex() {
+        return indexName;
+    }
 
-	/**
-	 * @return false
-	 */
-	@Override
-	public boolean isComposite() {
-		return false;
-	}
+    public String getBaseName() {
+        return baseName;
+    }
 
-	/**
-	 * Calls the {@link ExpressionVisitor#visit(BaseVector)} method on a visitor object.
-	 * 
-	 * @param visitor The visitor object to call the method on.
-	 */
-	@Override
-	public void accept(ExpressionVisitor visitor) {
-		visitor.visit(this);
-	}
-	
-	@Override
-	public void replaceExpression(Expression old, Expression newExpression) {
-		// nothing to replace
-	}
+    public String getIndexName(){
+        return indexName;
+    }
 
-	/**
-	 * Converts this base vector to a human readable string.
-	 * 
-	 * @return The string "ei" where <code>i</code> is the index of this base vector as returned by
-	 *         <code>getIndex</code>.
-	 */
-	@Override
-	public String toString() {
-		return "e" + index;
-	}
+    @Override
+    public Expression copy() {
+        return new BaseVector(this.baseName, this.indexName);
+    }
 
-	/**
-	 * Checks two BaseVector objects for equality.
-	 * 
-	 * @param o The other object.
-	 * @return True if this and the other object are of the same class and the base vector index of this and the other
-	 *         object are equal.
-	 */
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
+    /**
+     * @return false
+     */
+    @Override
+    public boolean isComposite() {
+        return false;
+    }
 
-		BaseVector that = (BaseVector) o;
+    /**
+     * Calls the {@link ExpressionVisitor#visit(BaseVector)} method on a visitor object.
+     *
+     * @param visitor The visitor object to call the method on.
+     */
+    @Override
+    public void accept(ExpressionVisitor visitor) {
+        visitor.visit(this);
+    }
 
-		return index.equals(that.index);
-	}
+    @Override
+    public void replaceExpression(Expression old, Expression newExpression) {
+        // nothing to replace
+    }
 
-	@Override
-	public int hashCode() {
-		return index.hashCode();
-	}
+    /**
+     * Converts this base vector to a human readable string.
+     *
+     * @return The string "ei" where <code>i</code> is the index of this base vector as returned by
+     *         <code>getIndexName</code>.
+     */
+    @Override
+    public String toString() {
+        return baseName+indexName;
+    }
+
+    /**
+     * Checks two BaseVector objects for equality.
+     *
+     * @param o The other object.
+     * @return True if this and the other object are of the same class and the base vector index of this and the other
+     *         object are equal.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+                return true;
+        if (o == null || getClass() != o.getClass())
+                return false;
+
+        BaseVector that = (BaseVector) o;
+
+        return indexName.equals(that.indexName) && baseName.equals(that.baseName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(baseName, indexName);
+    }
 }

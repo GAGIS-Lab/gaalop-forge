@@ -22,6 +22,7 @@ public class CompilerFacade extends Observable {
     private final CodeGenerator codeGenerator;
     
     private final String algebraName;
+    private final int dimension;
     private final boolean asRessource;
     private final String algebraBaseDirectory;
 
@@ -39,6 +40,11 @@ public class CompilerFacade extends Observable {
      * @param algebraBaseDirectory
      */
     public CompilerFacade(CodeParser codeParser, GlobalSettingsStrategy globalSettingsStrategy, VisualCodeInserterStrategy visualizerStrategy, AlgebraStrategy algebraStrategy, OptimizationStrategy optimizationStrategy, CodeGenerator codeGenerator, String algebraName, boolean asRessource, String algebraBaseDirectory) {
+        this(codeParser, globalSettingsStrategy, visualizerStrategy, algebraStrategy,
+                optimizationStrategy, codeGenerator, algebraName, 1, asRessource, algebraBaseDirectory);
+    }
+
+    public CompilerFacade(CodeParser codeParser, GlobalSettingsStrategy globalSettingsStrategy, VisualCodeInserterStrategy visualizerStrategy, AlgebraStrategy algebraStrategy, OptimizationStrategy optimizationStrategy, CodeGenerator codeGenerator, String algebraName, int dimension, boolean asRessource, String algebraBaseDirectory) {
         this.codeParser = codeParser;
         this.globalSettingsStrategy = globalSettingsStrategy;
         this.visualizerStrategy = visualizerStrategy;
@@ -46,6 +52,7 @@ public class CompilerFacade extends Observable {
         this.optimizationStrategy = optimizationStrategy;
         this.codeGenerator = codeGenerator;
         this.algebraName = algebraName;
+        this.dimension = dimension;
         this.asRessource = asRessource;
         this.algebraBaseDirectory = algebraBaseDirectory;
     }
@@ -68,6 +75,7 @@ public class CompilerFacade extends Observable {
         setChanged();
         
         graph.algebraName = algebraName;
+        graph.dimension = dimension;
         graph.asRessource = asRessource;
         graph.algebraBaseDirectory = algebraBaseDirectory;
         

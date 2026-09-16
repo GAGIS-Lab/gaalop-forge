@@ -64,16 +64,25 @@ public class AlStrategy implements AlgebraStrategy {
 
             alFile.setProductsFilePath(baseDir+"products.csv");
 
-            if (plugin.algebraDefinitionString == null) {
-                alFile.setProductsFilePath(baseDir+"products.csv");
-                reader = (graph.asRessource)
-                        ? new InputStreamReader(getClass().getResourceAsStream(baseDir+"definition.csv"))
-                        : new FileReader(new File(baseDir+"definition.csv"));
-            } else
-                reader = new StringReader(plugin.algebraDefinitionString);
-            alFile.loadFromFile(reader);
+            if (plugin.algebraDefinitionString == null && "qca".equals(graph.algebraName)) {
+                alFile.create("qca", graph.dimension);
+                alFile.setUsePrecalculatedTable(false);
+            } else {
+                if (plugin.algebraDefinitionString == null) {
+                    reader = (graph.asRessource)
+                            ? new InputStreamReader(getClass().getResourceAsStream(baseDir+"definition.csv"))
+                            : new FileReader(new File(baseDir+"definition.csv"));
+                } else {
+                    reader = new StringReader(plugin.algebraDefinitionString);
+                }
+                alFile.loadFromFile(reader);
+                if (graph.algebraName.matches("qra[2-9]")) {
+                    alFile.setUsePrecalculatedTable(false);
+                }
+            }
 
-            createBlades(alFile);
+            if (graph.algebraName.matches("qra[2-9]")) QraBladeCatalog.create(alFile);
+            else createBlades(alFile);
 
             //replace all functions / macros
 
@@ -136,7 +145,11 @@ public class AlStrategy implements AlgebraStrategy {
             // Update output blades
             // Create map of blades to index
             HashMap<String[], Integer> indexByBlades = new HashMap<String[], Integer>();
-            for (int index = 0; index < alFile.blades.length; index++) {
+            boolean hasBladeSelection = false;
+            for (String output : graph.getPragmaOutputVariables()) {
+                if (output.contains(" ")) hasBladeSelection = true;
+            }
+            for (int index = 0; hasBladeSelection && index < alFile.blades.length; index++) {
                 Expression expression = alFile.blades[index];
                 List<String> blades = decomposeBlades(expression);
                 indexByBlades.put(blades.toArray(new String[0]), index);
@@ -190,12 +203,12 @@ public class AlStrategy implements AlgebraStrategy {
                     outputVariables.add(outputVariable);
             }
         } catch (CodeParserException ex) {
-            Logger.getLogger(AlStrategy.class.getName()).log(Level.SEVERE, null, ex);
+            throw new OptimizationException("Cannot parse macros for algebra " + graph.algebraName, ex, graph);
         } catch (IOException ex) {
-            Logger.getLogger(AlStrategy.class.getName()).log(Level.SEVERE, null, ex);
+            throw new OptimizationException("Cannot load algebra " + graph.algebraName, ex, graph);
         } finally {
             try {
-                reader.close();
+                if (reader != null) reader.close();
             } catch (IOException ex) {
                 Logger.getLogger(AlStrategy.class.getName()).log(Level.SEVERE, null, ex);
             }

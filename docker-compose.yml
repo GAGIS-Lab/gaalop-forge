@@ -2,7 +2,7 @@ services:
   gaalop-forge:
     build:
       context: .
-    image: gagislab/gaalop-forge:1.0.0
+    image: gagislab/gaalop-forge:1.1.0
     container_name: gaalop-forge
     ports:
       - "18080:8080"

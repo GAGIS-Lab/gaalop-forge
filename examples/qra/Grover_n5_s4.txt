@@ -1,0 +1,92 @@
+// === Basic Definitions ===
+//  Imaginary unit
+i = er1*er2;
+
+// Witt basis
+f1 = 0.5*(e1 + i*e6);
+f1T = 0.5*(e1 - i*e6);
+f2 = 0.5*(e2 + i*e7);
+f2T = 0.5*(e2 - i*e7);
+f3 = 0.5*(e3 + i*e8);
+f3T = 0.5*(e3 - i*e8);
+f4 = 0.5*(e4 + i*e9);
+f4T = 0.5*(e4 - i*e9);
+f5 = 0.5*(e5 + i*e10);
+f5T = 0.5*(e5 - i*e10);
+
+// Element I (Identity)
+Id = f1*f1T*f2*f2T*f3*f3T*f4*f4T*f5*f5T;
+
+// === Ket Basis Vectors ===
+ket00000 = 1*Id;
+ket00001 = f5T*Id;
+ket00010 = f4T*Id;
+ket00011 = f4T*f5T*Id;
+ket00100 = f3T*Id;
+ket00101 = f3T*f5T*Id;
+ket00110 = f3T*f4T*Id;
+ket00111 = f3T*f4T*f5T*Id;
+ket01000 = f2T*Id;
+ket01001 = f2T*f5T*Id;
+ket01010 = f2T*f4T*Id;
+ket01011 = f2T*f4T*f5T*Id;
+ket01100 = f2T*f3T*Id;
+ket01101 = f2T*f3T*f5T*Id;
+ket01110 = f2T*f3T*f4T*Id;
+ket01111 = f2T*f3T*f4T*f5T*Id;
+ket10000 = f1T*Id;
+ket10001 = f1T*f5T*Id;
+ket10010 = f1T*f4T*Id;
+ket10011 = f1T*f4T*f5T*Id;
+ket10100 = f1T*f3T*Id;
+ket10101 = f1T*f3T*f5T*Id;
+ket10110 = f1T*f3T*f4T*Id;
+ket10111 = f1T*f3T*f4T*f5T*Id;
+ket11000 = f1T*f2T*Id;
+ket11001 = f1T*f2T*f5T*Id;
+ket11010 = f1T*f2T*f4T*Id;
+ket11011 = f1T*f2T*f4T*f5T*Id;
+ket11100 = f1T*f2T*f3T*Id;
+ket11101 = f1T*f2T*f3T*f5T*Id;
+ket11110 = f1T*f2T*f3T*f4T*Id;
+ket11111 = f1T*f2T*f3T*f4T*f5T*Id;
+
+// === Quantum Gates ===
+
+// Hadamard Gates
+h1 = (1/sqrt(2))*(f1*f1T + f1 + f1T - f1T*f1);
+h2 = (1/sqrt(2))*(f2*f2T + f2 + f2T - f2T*f2);
+h3 = (1/sqrt(2))*(f3*f3T + f3 + f3T - f3T*f3);
+h4 = (1/sqrt(2))*(f4*f4T + f4 + f4T - f4T*f4);
+h5 = (1/sqrt(2))*(f5*f5T + f5 + f5T - f5T*f5);
+
+// NOT Gates (Pauli-X)
+not1 = f1 + f1T;
+not2 = f2 + f2T;
+not3 = f3 + f3T;
+not4 = f4 + f4T;
+not5 = f5 + f5T;
+
+// Multi-Controlled Z (flips phase of |11...1>)
+mcz = (f1*f1T + f1T*f1*(f2*f2T + f2T*f2*(f3*f3T + f3T*f3*(f4*f4T + f4T*f4*(f5*f5T - f5T*f5)))));
+
+// === Diffusion Operator ===
+diffusion = h1*h2*h3*h4*h5*not1*not2*not3*not4*not5 * mcz * not5*not4*not3*not2*not1*h5*h4*h3*h2*h1;
+
+// === Oracle Operator ===
+oracle = (not1*not2*not4*not5 * mcz * not5*not4*not2*not1);
+
+// === Grover Operator ===
+grover = diffusion * oracle;
+
+// Iterations needed: 3
+full_operator = grover*grover*grover;
+
+// === Algorithm Execution ===
+// superposition
+psi = h1*h2*h3*h4*h5*Id;
+
+res = full_operator * psi;
+
+// Result
+?res;

@@ -1,0 +1,4 @@
+# Preserve imported source bytes so vendor SHA256 verification is portable.
+native/qra/vendor/** -text
+docker/*.sh text eol=lf
+native/qra/*.sh text eol=lf

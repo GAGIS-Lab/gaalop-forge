@@ -36,7 +36,7 @@ public class TCBlade {
 
         Expression[] exprArr = new Expression[base.length];
         for (int i=0;i<exprArr.length;i++)
-            exprArr[i] = new BaseVector(base[i].substring(1));
+            exprArr[i] = new BaseVector(base[i].substring(0,1),base[i].substring(1));
         
         return exprArrToOuterProduct(exprArr);
     }
