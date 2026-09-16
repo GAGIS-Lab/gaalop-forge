@@ -31,7 +31,7 @@ public class BaseVectorReplaceVisitor extends EmptyControlFlowVisitor {
         @Override
         public void visit(Variable node) {
             if (definer.isBaseVector(node.getName()))
-                result = new BaseVector(node.getName().substring(1));
+                result = new BaseVector(node.getName().substring(0,1), node.getName().substring(1));
             
             super.visit(node);
         }

@@ -37,6 +37,9 @@ public class Main {
   
   @Option(name = "--algebraName", aliases = { "-a" }, required = false, usage = "Sets the name of the algebra that should be used.")
   private String algebraName = "cga";
+
+  @Option(name = "--algebraDimension", required = false, usage = "QCA qubit count (1-10). Default: 1; high dimensions require substantial memory.")
+  private int algebraDimension = 1;
   
   @Option(name = "--algebraBaseDir", aliases = { "--ad" }, required = false, usage = "Sets the base directory path of the user-defined algebras.")
   private String algebraBaseDirectory = null;
@@ -161,7 +164,7 @@ public class Main {
         if (definedAlgebra.id.equals(algebraName.trim())) 
             asRessource = true;
    
-    return new CompilerFacade(codeParser, globalSettingsStrategy, visualizerStrategy, algebraStrategy, optimizationStrategy, codeGenerator, algebraName, asRessource, algebraBaseDirectory);
+    return new CompilerFacade(codeParser, globalSettingsStrategy, visualizerStrategy, algebraStrategy, optimizationStrategy, codeGenerator, algebraName, algebraDimension, asRessource, algebraBaseDirectory);
   }
   
   private void setSpecificOptionsForPlugin(Object plugin) {

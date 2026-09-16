@@ -205,4 +205,79 @@ public class AlgebraDefinitionFile {
     }
 
 
+    /** QCA generator ported from orat/Gaalop, including metric fix 11da0993. */
+    public boolean create(String name, int dimension) {
+        if (!"qca".equals(name)) return false;
+        if (dimension < 1 || dimension > 10) {
+            throw new IllegalArgumentException("QCA dimension must be between 1 and 10.");
+        }
+        baseSquares.clear();
+        createQCA(dimension);
+        createIndices();
+        return true;
+    }
+
+    /** Upstream QCA signature, matching the generated metric. */
+    public static String getSignatureString(String name, int dimension) {
+        return "qca".equals(name) ? "Cl(" + (dimension + 2) + "," + dimension + ",0)" : null;
+    }
+
+    public String getSignatureString() {
+        return "Cl(" + getSignature().toString() + ")";
+    }
+
+    private void createQCA(int dimension){
+        // old: 1, e0p, e0m, f1, f1T
+        // new: 1, ei1, ei2, f1, f1T
+        base = new String[2+2*dimension+1];
+        base[0] = "1"; base[1] = "ei1"; base[2] = "ei2";
+        for (int i=1;i<=dimension;i++){
+            base[1+2*i] = "f"+String.valueOf(i);
+            base[2+2*i] = "f"+String.valueOf(i)+"T";
+        }
+
+        // e1p=1.0*f1+1.0*f1T,e1m=1.0*f1-1.0*f1T
+        StringBuilder sb = new StringBuilder();
+        for (int i=1;i<=dimension;i++){
+            sb.append("e"); sb.append(String.valueOf(i)); sb.append("p=1.0*f");
+            sb.append(String.valueOf(i)); sb.append("+1.0*f"); sb.append(String.valueOf(i));
+            sb.append("T,e"); sb.append(String.valueOf(i)); sb.append("m=1.0*f");
+            sb.append(String.valueOf(i)); sb.append("-1.0*f"); sb.append(String.valueOf(i));
+            sb.append("T,");
+        }
+        sb.deleteCharAt(sb.length()-1);
+        lineMapPlusMinusToZeroInf = sb.toString();
+
+        // old: 1, e0p, e0m, e1p, e1m
+        // new: 1, ei1, ei2, e1p, e1m
+        base2 = new String[2+2*dimension+1];
+        base2[0] = "1"; base2[1] = "ei1"; base2[2] = "ei2";
+        for (int i=1;i<=dimension;i++){
+            base2[1+2*i] = "e"+String.valueOf(i) + "p";
+            base2[2+2*i] = "e"+String.valueOf(i) + "m";
+        }
+
+        // old: e0p=1, e0m=-1, e1p=1, e1m=-1
+        // new: ei1=1, ei2=1, e1p=1, e1m=-1
+        // HashMap<String, Byte> baseSquares
+        baseSquares.put("ei1", (byte) 1);
+        baseSquares.put("ei2", (byte) 1);
+        for (int i=1;i<=dimension;i++){
+            baseSquares.put("e"+String.valueOf(i)+"p",(byte) 1);
+            baseSquares.put("e"+String.valueOf(i)+"m",(byte) -1);
+        }
+
+        // f1=0.5*e1p+0.5*e1m, f1T=0.5*e1p-0.5*e1m
+        sb = new StringBuilder();
+        for (int i=1;i<=dimension;i++){
+            sb.append("f"); sb.append(String.valueOf(i)); sb.append("=0.5*e");
+            sb.append(String.valueOf(i)); sb.append("p+0.5*e"); sb.append(String.valueOf(i));
+            sb.append("m,f"); sb.append(String.valueOf(i)); sb.append("T=0.5*e");
+            sb.append(String.valueOf(i)); sb.append("p-0.5*e"); sb.append(String.valueOf(i));
+            sb.append("m,");
+        }
+        sb.deleteCharAt(sb.length()-1);
+        lineMapZeroInfToPlusMinus = sb.toString();
+    }
+
 }

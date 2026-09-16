@@ -1,0 +1,60 @@
+// === Basic Definitions ===
+//  Imaginary unit
+i = er1*er2;
+
+// Witt basis
+f1 = 0.5*(e1 + i*e4);
+f1T = 0.5*(e1 - i*e4);
+f2 = 0.5*(e2 + i*e5);
+f2T = 0.5*(e2 - i*e5);
+f3 = 0.5*(e3 + i*e6);
+f3T = 0.5*(e3 - i*e6);
+
+// Element I (Identity)
+Id = f1*f1T*f2*f2T*f3*f3T;
+
+// === Ket Basis Vectors ===
+ket000 = 1*Id;
+ket001 = f3T*Id;
+ket010 = f2T*Id;
+ket011 = f2T*f3T*Id;
+ket100 = f1T*Id;
+ket101 = f1T*f3T*Id;
+ket110 = f1T*f2T*Id;
+ket111 = f1T*f2T*f3T*Id;
+
+// === Quantum Gates ===
+
+// Hadamard Gates
+h1 = (1/sqrt(2))*(f1*f1T + f1 + f1T - f1T*f1);
+h2 = (1/sqrt(2))*(f2*f2T + f2 + f2T - f2T*f2);
+h3 = (1/sqrt(2))*(f3*f3T + f3 + f3T - f3T*f3);
+
+// NOT Gates (Pauli-X)
+not1 = f1 + f1T;
+not2 = f2 + f2T;
+not3 = f3 + f3T;
+
+// Multi-Controlled Z (flips phase of |11...1>)
+mcz = (f1*f1T + f1T*f1*(f2*f2T + f2T*f2*(f3*f3T - f3T*f3)));
+
+// === Diffusion Operator ===
+diffusion = h1*h2*h3*not1*not2*not3 * mcz * not3*not2*not1*h3*h2*h1;
+
+// === Oracle Operator ===
+oracle = (not2 * mcz * not2)*(not3 * mcz * not3);
+
+// === Grover Operator ===
+grover = diffusion * oracle;
+
+// Iterations needed: 1
+full_operator = grover;
+
+// === Algorithm Execution ===
+// superposition
+psi = h1*h2*h3*Id;
+
+res = full_operator * psi;
+
+// Result
+?res;

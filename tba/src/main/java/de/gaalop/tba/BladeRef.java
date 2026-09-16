@@ -8,10 +8,10 @@ package de.gaalop.tba;
  */
 public class BladeRef {
 
-    private byte prefactor;
+    private float prefactor;
     private int index;
 
-    public BladeRef(byte prefactor, int index) {
+    public BladeRef(float prefactor, int index) {
         this.prefactor = prefactor;
         this.index = index;
     }
@@ -20,7 +20,7 @@ public class BladeRef {
         return index;
     }
 
-    public byte getPrefactor() {
+    public float getPrefactor() {
         return prefactor;
     }
 
@@ -28,7 +28,7 @@ public class BladeRef {
         this.index = index;
     }
 
-    public void setPrefactor(byte prefactor) {
+    public void setPrefactor(float prefactor) {
         this.prefactor = prefactor;
     }
 
@@ -40,7 +40,7 @@ public class BladeRef {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 59 * hash + this.prefactor;
+        hash = 59 * hash + Float.floatToIntBits(prefactor);
         hash = 59 * hash + this.index;
         return hash;
     }
@@ -62,7 +62,4 @@ public class BladeRef {
         }
         return true;
     }
-
-    
-
 }

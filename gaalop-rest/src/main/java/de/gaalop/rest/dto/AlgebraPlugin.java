@@ -11,7 +11,9 @@ public enum AlgebraPlugin {
     ALGEBRA_GAC("gac", "geometric algebra for conics"),
     ALGEBRA_DCGA("dcga", "double conformal geometric algebra"),
     ALGEBRA_CCGA("ccga", "cubic CGA"),
-    ALGEBRA_QGA("qga", "quantum bit geometric algebra");
+    ALGEBRA_QGA("qga", "quantum bit geometric algebra"),
+    ALGEBRA_QCA("qca", "quantum computing algebra"),
+    ALGEBRA_QRA("qra", "Quantum Register Algebra");
 
     private final String algebraId;
     private final String displayName;

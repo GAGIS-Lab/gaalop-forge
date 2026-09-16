@@ -18,7 +18,7 @@ public class Parser {
      */
     public static BladeRef parseBladeRef(String parse) {
 
-        byte prefactor = 1;
+        float prefactor = 1;
         int index = 0;
 
         String trimmed = parse.trim();
@@ -37,7 +37,7 @@ public class Parser {
                 } else {
                     // for instance -1E10
                     String[] parts = trimmed.split("E");
-                    prefactor = (byte) Integer.parseInt(parts[0]);
+                    prefactor = Float.parseFloat(parts[0]);
                     index = Integer.parseInt(parts[1]);
                 }
             }

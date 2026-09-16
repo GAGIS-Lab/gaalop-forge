@@ -103,7 +103,7 @@ public class Blade {
         if (string.equals("1")) {
             return new FloatConstant(1);
         } else {
-            return new BaseVector(string.substring(1));
+            return new BaseVector(string.substring(0, 1), string.substring(1));
         }
     }
 

@@ -3,6 +3,15 @@ package de.gaalop.rest.dto;
 public class CompileRequest {
 
     private AlgebraPlugin algebraPlugins;
+    private Integer algebraDimension;
+
+    public Integer getAlgebraDimension() {
+        return algebraDimension;
+    }
+
+    public void setAlgebraDimension(Integer algebraDimension) {
+        this.algebraDimension = algebraDimension;
+    }
     private CodegenPlugin codegenPlugins;
     private OutputMode outputMode = OutputMode.CODE_ONLY;
     private Boolean visualizationEnabled = Boolean.FALSE;

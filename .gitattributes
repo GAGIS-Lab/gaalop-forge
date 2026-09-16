@@ -1,0 +1,2 @@
+# Preserve imported source bytes so vendor SHA256 verification is portable.
+native/qra/vendor/** -text

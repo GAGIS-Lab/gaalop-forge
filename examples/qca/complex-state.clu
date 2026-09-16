@@ -1,0 +1,8 @@
+// QCA, 2 qubits.
+// Variable Assignments: theta=1.5707963267948966;
+// Multivectors to be Visualized: :psi;
+j=ei1*ei2;
+Id=f1*f1T*f2*f2T;
+ket00=Id;
+ket11=f1T*f2T*Id;
+?psi=cos(theta/2)*ket00+j*sin(theta/2)*ket11;

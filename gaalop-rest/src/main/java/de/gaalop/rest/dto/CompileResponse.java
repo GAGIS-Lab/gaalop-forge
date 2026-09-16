@@ -6,6 +6,16 @@ public class CompileResponse {
     private final String message;
     private final String optimizeResult;
     private final String visualizationCode;
+    private java.util.Map<String, de.gaalop.garamon.qra.QraStateProjection.Result> quantumResults;
+
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+    public java.util.Map<String, de.gaalop.garamon.qra.QraStateProjection.Result> getQuantumResults() {
+        return quantumResults;
+    }
+
+    public void setQuantumResults(java.util.Map<String, de.gaalop.garamon.qra.QraStateProjection.Result> results) {
+        quantumResults = results;
+    }
 
     public CompileResponse(String statusCode, String message, String optimizeResult, String visualizationCode) {
         this.statusCode = statusCode;

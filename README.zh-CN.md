@@ -50,11 +50,11 @@ Docker 方式已经包含前端、后端、Nginx、JRE 17 和 Maxima，是最省
 从 Docker Hub 拉取已发布镜像：
 
 ```bash
-docker pull gagislab/gaalop-forge:1.0.0
+docker pull gagislab/gaalop-forge:1.1.0
 docker run -d --name gaalop-forge -p 18080:8080 \
   -e GAALOP_SWAGGER_USERNAME=admin \
   -e GAALOP_SWAGGER_PASSWORD=change-me \
-  gagislab/gaalop-forge:1.0.0
+  gagislab/gaalop-forge:1.1.0
 ```
 
 也可以从源码构建：
@@ -224,9 +224,11 @@ Content-Type: application/json
 
 ### 常用枚举
 
+以下为共享后端 API 的枚举。传统 GaalopWeb 页面已移除 QGA、QCA 量子入口和 qubit 配置；相关核心与 API 能力保留，供后续独立 QuantumGaalopWeb 复用。独立量子前端目前尚未实现。
+
 | 类别 | 可选值 |
 |---|---|
-| 代数空间 | `ALGEBRA_2D`、`ALGEBRA_3D`、`ALGEBRA_2D_PGA`、`ALGEBRA_3D_PGA`、`ALGEBRA_CRA`、`ALGEBRA_STA`、`ALGEBRA_CGA`、`ALGEBRA_GAC`、`ALGEBRA_DCGA`、`ALGEBRA_CCGA`、`ALGEBRA_QGA` |
+| 代数空间 | `ALGEBRA_2D`、`ALGEBRA_3D`、`ALGEBRA_2D_PGA`、`ALGEBRA_3D_PGA`、`ALGEBRA_CRA`、`ALGEBRA_STA`、`ALGEBRA_CGA`、`ALGEBRA_GAC`、`ALGEBRA_DCGA`、`ALGEBRA_CCGA`、`ALGEBRA_QGA`、`ALGEBRA_QCA` |
 | 输出模式 | `CODE_ONLY`、`CODE_AND_VISUALIZATION`、`VISUALIZATION_ONLY` |
 | 代码生成器 | `JAVA`、`CPP`、`CSHARP`、`PYTHON`、`RUST`、`JULIA`、`MATLAB`、`MATHEMATICA`、`LATEX`、`VERILOG`、`DOT`、`GANJA`、`GAPP` 等 |
 
@@ -255,6 +257,14 @@ docs/gaalopscript-analysis/ GAALOPScript 深入分析文档
 - [完整语言参考](./docs/gaalopscript-analysis/02-完整语言参考.md)
 - [贡献者指南](./AGENTS.md)
 
+## QRA 扩展与维护
+
+QRA 加速库的生成器、桥接模板、必需的第三方头文件和许可证已整理在 `native/qra/`，默认构建不依赖外部资源目录。
+
+- [加速库生成与维护指南](docs/qra-acceleration-maintenance.md)：生成流程、Windows/Linux 构建、Java 调用及 qubit 扩展。
+- [QRA 后端说明](docs/qra-integration.md)与[量子网页说明](docs/quantum-qra-web.md)。
+- [9 qubit 内存实测](docs/qra-9qubit-memory.md)与[原始 Grover 脚本测试](docs/qra-resource-script-tests.md)。
+
 ## 测试与排障
 
 ```bash
@@ -266,6 +276,8 @@ cd frontend && pnpm build              # 验证前端可生产构建
 - **前端请求到了错误的服务**：确认 `VITE_API_TARGET` 指向当前后端，并在修改后重启 Vite。
 - **Maxima 优化失败**：检查 `gaalop.maxima.command` 是否指向可执行文件；不使用该优化时无需安装 Maxima。
 - **端口冲突**：本地后端和前端默认使用 `8080`、`5173`，Docker 对外使用 `18080`。
+- **`Failure in @ExceptionHandler` / `No acceptable representation`**：缺失资源的请求可能只接受 HTML、CSS 或图片。REST 错误响应固定使用 `application/json`，保留原始 400/404/500 状态和错误结构；接口本身无法满足 `Accept` 时返回空响应体的 406。升级后端后若仍出现该日志，请记录请求 URL 和 `Accept` 请求头。
+- **`Invalid character found in method name [0x160x030x01…]`**：HTTPS/TLS 请求到达了纯 HTTP 监听端口。本地直连应使用 `http://localhost:8080`，默认 Docker 部署使用 `http://localhost:18080`。如需 HTTPS，应在配置证书的反向代理上终止 TLS，再通过 HTTP 转发至应用；检查代理上游地址是否误写为 `https://`。此错误发生在 Tomcat 解析请求阶段，REST 异常处理器无法处理。仅凭该日志不能判断是浏览器访问、代理配置还是外部探测导致。
 - **首次 Maven 构建较慢**：项目包含较多编译和代码生成模块，Maven 需要下载完整依赖。
 
 编译历史默认关闭，因为记录中包含用户提交的脚本和生成结果。如需启用，设置环境变量 `GAALOP_COMPILE_HISTORY_ENABLED=true`；生产部署还应设置目录访问权限并制定清理策略。

@@ -83,6 +83,7 @@ public final class ControlFlowGraph {
         public LinkedList<UnknownMacroCall> unknownMacros = new LinkedList<UnknownMacroCall>();
 
         public String algebraName;
+        public int dimension = 1;
         public boolean asRessource;
         public String algebraBaseDirectory;
 

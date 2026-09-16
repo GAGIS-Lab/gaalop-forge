@@ -1,0 +1,17 @@
+createPoint = {
+ _P(1)
+}
+
+Dual = {
+ _P(1)
+}
+
+notUnion = {  
+    e1^e2^e3^e4  
+}
+
+
+Element = {
+    Id = f1*f1T*f2*f2T*f3*f3T*f4*f4T;
+    Id
+}

@@ -1,27 +1,6 @@
 <template>
   <div ref="pageRoot" class="editor-page">
-    <header ref="topbarRef" class="topbar">
-      <div class="topbar-brand">Gaalop</div>
-      <nav class="topbar-nav">
-        <button class="nav-item nav-button" :class="{ active: activeView === 'home' }" type="button" @click="showFuturePage('home')">Home</button>
-        <button class="nav-item nav-button" :class="{ active: activeView === 'online' }" type="button" @click="showOnlineEditing">Online Editing</button>
-        <button class="nav-item nav-button" :class="{ active: activeView === 'agent' }" type="button" @click="showFuturePage('agent')">GA-CodeAgent</button>
-      </nav>
-      <div class="topbar-actions">
-        <div class="last-run-chip" :class="{ error: runState.kind === 'error' }">
-          <CheckOutlined v-if="runState.kind !== 'error'" />
-          <CloseCircleOutlined v-else />
-          <span>{{ lastRunText }}</span>
-        </div>
-        <div class="account-chip">
-          <a-avatar :size="36" class="account-avatar">
-            <template #icon><UserOutlined /></template>
-          </a-avatar>
-          <span>GACRAC</span>
-          <DownOutlined />
-        </div>
-      </div>
-    </header>
+    <WorkspaceHeader ref="topbarRef" :active-view="activeView" :status-text="lastRunText" :error="runState.kind === 'error'" @navigate="navigateFromHeader" />
 
     <div ref="pageBodyRef" class="page-body" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
       <aside class="sidebar">
@@ -128,10 +107,13 @@
                       </div>
                     </div>
                     <div class="monaco-editor-shell">
-                      <div ref="mainEditorContainer" class="monaco-editor-host"></div>
+                      <textarea v-if="!editorReady" v-model="form.script.optimizeCode" class="editor-input" aria-label="Code to Optimize" spellcheck="false" wrap="off" @input="handleBasicInput($event, mainCursor)" @keyup="updateBasicCursor($event, mainCursor)" @click="updateBasicCursor($event, mainCursor)" @blur="finishEditorUpgrade"></textarea>
+                      <div v-show="editorReady" ref="mainEditorContainer" class="monaco-editor-host"></div>
                     </div>
                     <div class="panel-footer">
                       <span>Ln {{ mainCursor.line }}, Col {{ mainCursor.column }}</span>
+                      <span v-if="editorLoadFailed">Syntax highlighting unavailable</span>
+                      <span v-else-if="!editorReady">Plain text editing available</span>
                       <span>{{ mainLines.length }} lines</span>
                     </div>
                   </article>
@@ -150,7 +132,8 @@
                           </div>
                         </div>
                         <div class="monaco-editor-shell monaco-editor-shell-compact">
-                          <div ref="variableEditorContainer" class="monaco-editor-host"></div>
+                          <textarea v-if="!editorReady" v-model="form.script.variableAssignments" class="editor-input" aria-label="Variable Assignments" spellcheck="false" wrap="off" @input="handleBasicInput($event, variableCursor)" @keyup="updateBasicCursor($event, variableCursor)" @click="updateBasicCursor($event, variableCursor)" @blur="finishEditorUpgrade"></textarea>
+                          <div v-show="editorReady" ref="variableEditorContainer" class="monaco-editor-host"></div>
                         </div>
                         <div class="panel-footer">
                           <span>Ln {{ variableCursor.line }}, Col {{ variableCursor.column }}</span>
@@ -170,7 +153,8 @@
                           </div>
                         </div>
                         <div class="monaco-editor-shell monaco-editor-shell-compact">
-                          <div ref="multivectorEditorContainer" class="monaco-editor-host"></div>
+                          <textarea v-if="!editorReady" v-model="form.script.multivectorsVisualized" class="editor-input" aria-label="Multivectors to be Visualized" spellcheck="false" wrap="off" @input="handleBasicInput($event, multivectorCursor)" @keyup="updateBasicCursor($event, multivectorCursor)" @click="updateBasicCursor($event, multivectorCursor)" @blur="finishEditorUpgrade"></textarea>
+                          <div v-show="editorReady" ref="multivectorEditorContainer" class="monaco-editor-host"></div>
                         </div>
                         <div class="panel-footer">
                           <span>Ln {{ multivectorCursor.line }}, Col {{ multivectorCursor.column }}</span>
@@ -277,7 +261,8 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import WorkspaceHeader from "./components/WorkspaceHeader.vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import {
   CaretRightFilled,
   CheckOutlined,
@@ -306,8 +291,7 @@ const algebraOptions = [
   { value: "ALGEBRA_CGA", label: "Conformal geometric algebra" },
   { value: "ALGEBRA_GAC", label: "Geometric algebra for conics" },
   { value: "ALGEBRA_DCGA", label: "Double conformal geometric algebra" },
-  { value: "ALGEBRA_CCGA", label: "Conformal conic geometric algebra" },
-  { value: "ALGEBRA_QGA", label: "Quadric geometric algebra" }
+  { value: "ALGEBRA_CCGA", label: "Conformal conic geometric algebra" }
 ];
 
 const codegenOptions = [
@@ -493,7 +477,6 @@ const dirty = ref(false);
 const previewZoomed = ref(false);
 const activeView = ref("online");
 const sidebarCollapsed = ref(false);
-const multivectorText = ref(form.script.multivectorsVisualized);
 const pageRoot = ref(null);
 const topbarRef = ref(null);
 const pageBodyRef = ref(null);
@@ -521,6 +504,8 @@ let completionProviders = [];
 let layoutRaf = 0;
 let monaco = null;
 let monacoSetupPromise = null;
+const editorReady = ref(false);
+const editorLoadFailed = ref(false);
 let disposed = false;
 
 const futurePages = {
@@ -616,7 +601,7 @@ const lastRunText = computed(() => {
 
 const mainLines = computed(() => form.script.optimizeCode.split("\n"));
 const variableLines = computed(() => form.script.variableAssignments.split("\n"));
-const multivectorLines = computed(() => multivectorText.value.split("\n"));
+const multivectorLines = computed(() => form.script.multivectorsVisualized.split("\n"));
 const displayedCode = computed(() => result.optimizeResult || "// No generated code returned.");
 const generatedLines = computed(() => displayedCode.value.split("\n"));
 const displayedPreview = computed(() => buildVisualizationDocument(result.visualizationCode));
@@ -624,6 +609,33 @@ const generatedCodeHtml = computed(() => highlight(displayedCode.value));
 
 function markDirty() {
   dirty.value = true;
+}
+
+function updateBasicCursor(event, cursor) {
+  const beforeCursor = event.target.value.slice(0, event.target.selectionStart);
+  const lines = beforeCursor.split("\n");
+  cursor.line = lines.length;
+  cursor.column = lines[lines.length - 1].length + 1;
+}
+
+function handleBasicInput(event, cursor) {
+  markDirty();
+  updateBasicCursor(event, cursor);
+}
+
+function finishEditorUpgrade() {
+  // Wait until the next field has focus; never replace an editor mid-keystroke
+  // or during IME composition. The latest form values are used on activation.
+  queueMicrotask(() => {
+    if (monaco && !editorReady.value && !disposed) {
+      void setupMonaco();
+    }
+  });
+}
+
+function navigateFromHeader(view) {
+  if (view === 'online') showOnlineEditing();
+  else showFuturePage(view);
 }
 
 function showOnlineEditing() {
@@ -640,14 +652,14 @@ function toggleSidebar() {
   updateLayoutMetrics();
 }
 
-function handleMultivectorInput() {
-  form.script.multivectorsVisualized = multivectorText.value;
-  markDirty();
-}
-
 const optimizeScriptSymbols = computed(() => extractScriptSymbols(form.script.optimizeCode));
 const optimizeScriptMacros = computed(() => extractScriptMacros(form.script.optimizeCode));
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+const pageBaseUrl = new URL("./", window.location.href);
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const compileUrl = apiBaseUrl
+  ? `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/compile`
+  : new URL("api/v1/compile", pageBaseUrl).href;
+const ganjaScriptUrl = new URL("ganja.js", pageBaseUrl).href;
 
 function buildRequestBody() {
   return {
@@ -684,7 +696,7 @@ async function runCompilation() {
   runState.message = "";
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/v1/compile`, {
+    const response = await fetch(compileUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -737,7 +749,7 @@ function buildVisualizationDocument(coreScript) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="/ganja.js"><\/script>
+    <script src="${ganjaScriptUrl}"><\/script>
     <style>
       :root {
         color-scheme: light;
@@ -901,7 +913,6 @@ function formatRelative(timestamp) {
 }
 
 onMounted(() => {
-  multivectorText.value = form.script.multivectorsVisualized;
   updateLayoutMetrics();
   window.addEventListener("resize", handleWindowResize);
   void setupMonaco();
@@ -928,7 +939,7 @@ function updateLayoutMetrics() {
       return;
     }
 
-    const topbarHeight = topbarRef.value?.offsetHeight ?? 0;
+    const topbarHeight = topbarRef.value?.$el?.offsetHeight ?? 0;
     const toolbarHeight = toolbarPanelRef.value?.offsetHeight ?? 0;
     const pageBodyStyles = window.getComputedStyle(pageBodyRef.value);
     const padTop = Number.parseFloat(pageBodyStyles.paddingTop) || 0;
@@ -945,11 +956,22 @@ function updateLayoutMetrics() {
 }
 
 async function setupMonaco() {
+  if (editorReady.value || disposed) {
+    return;
+  }
   if (monacoSetupPromise) {
     return monacoSetupPromise;
   }
 
-  monacoSetupPromise = setupMonacoEditor();
+  editorLoadFailed.value = false;
+  monacoSetupPromise = setupMonacoEditor()
+    .catch((error) => {
+      editorLoadFailed.value = true;
+      console.warn("Syntax highlighting could not load; plain text editing remains available.", error);
+    })
+    .finally(() => {
+      monacoSetupPromise = null;
+    });
   return monacoSetupPromise;
 }
 
@@ -958,8 +980,8 @@ async function setupMonacoEditor() {
     return;
   }
 
-  monaco = await import("monaco-editor/esm/vs/editor/editor.api");
-  if (disposed) {
+  monaco = monaco || await import("monaco-editor/esm/vs/editor/editor.api");
+  if (disposed || document.activeElement?.classList.contains("editor-input")) {
     return;
   }
 
@@ -1023,6 +1045,9 @@ async function setupMonacoEditor() {
   mainEditor = createEditor(mainEditorContainer.value, form.script.optimizeCode, GAALOP_MAIN_LANGUAGE);
   variableEditor = createEditor(variableEditorContainer.value, form.script.variableAssignments, GAALOP_VARIABLE_LANGUAGE, { lineNumbersMinChars: 2 });
   multivectorEditor = createEditor(multivectorEditorContainer.value, form.script.multivectorsVisualized, GAALOP_VISUALIZATION_LANGUAGE, { lineNumbersMinChars: 2 });
+  mainEditor.setPosition({ lineNumber: mainCursor.line, column: mainCursor.column });
+  variableEditor.setPosition({ lineNumber: variableCursor.line, column: variableCursor.column });
+  multivectorEditor.setPosition({ lineNumber: multivectorCursor.line, column: multivectorCursor.column });
 
   mainEditor.onDidChangeModelContent(() => {
     form.script.optimizeCode = mainEditor.getValue();
@@ -1057,8 +1082,7 @@ async function setupMonacoEditor() {
   }
 
   multivectorEditor.onDidChangeModelContent(() => {
-    multivectorText.value = multivectorEditor.getValue();
-    form.script.multivectorsVisualized = multivectorText.value;
+    form.script.multivectorsVisualized = multivectorEditor.getValue();
     dirty.value = true;
   });
 
@@ -1073,6 +1097,8 @@ async function setupMonacoEditor() {
     multivectorCursor.column = multivectorInitial.column;
   }
 
+  editorReady.value = true;
+  await nextTick();
   updateLayoutMetrics();
 }
 

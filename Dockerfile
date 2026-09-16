@@ -1,3 +1,14 @@
+FROM ubuntu:22.04 AS qra-build
+
+RUN apt-get -o Acquire::Retries=5 update \
+    && apt-get -o Acquire::Retries=5 install -y --no-install-recommends cmake g++ make \
+    && rm -rf /var/lib/apt/lists/*
+COPY native/qra /src
+RUN cmake -S /src -B /build -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build /build --parallel 2 \
+    && ctest --test-dir /build --output-on-failure \
+    && cmake --install /build --prefix /native
+
 FROM maven:3.9.9-eclipse-temurin-17 AS backend-build
 
 WORKDIR /workspace
@@ -41,7 +52,7 @@ FROM eclipse-temurin:17-jre-jammy
 
 LABEL org.opencontainers.image.title="GAALOP Forge" \
       org.opencontainers.image.description="Geometric algebra compilation, optimization, code generation, and visualization platform" \
-      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.version="1.1.0" \
       org.opencontainers.image.licenses="LGPL-3.0-or-later"
 
 RUN apt-get -o Acquire::Retries=5 update \
@@ -58,6 +69,9 @@ RUN mkdir -p /app/tools/maxima/bin \
     && ln -s /usr/local/bin/maxima /app/tools/maxima/bin/maxima
 
 COPY --from=backend-build /workspace/gaalop-rest/target/gaalop-rest-1.0.0.jar /app/gaalop-rest.jar
+COPY --from=qra-build /native/ /app/nativeLibraries/garamon/
+COPY native/qra/vendor/garamon/LICENCE.txt /app/licenses/garamon-LICENSE.txt
+COPY native/qra/vendor/eigen-3.4.1/COPYING.* /app/licenses/eigen/
 COPY --from=frontend-build /workspace/frontend/dist /usr/share/nginx/html
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/start-container.sh /app/start-container.sh

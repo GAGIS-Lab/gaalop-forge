@@ -1,0 +1,45 @@
+#include <vector>
+#include <cmath>
+#include <cstdio>
+extern "C" int qra@N@_dimension();
+extern "C" int qra@N@_coeff_count();
+extern "C" int qra@N@_geometric_dense(const double*, const double*, double*);
+extern "C" int qra@N@_inner_dense(const double*, const double*, double*);
+extern "C" int qra@N@_outer_dense(const double*, const double*, double*);
+static int bits(unsigned x) { int n=0; while(x) { x &= x-1; ++n; } return n; }
+static int bladeSign(unsigned a, unsigned b) {
+    int parity=0;
+    while(a) { unsigned low=a & (~a+1); parity ^= bits(b & (low-1)) & 1; a ^= low; }
+    return parity ? -1 : 1;
+}
+int main() {
+    const int d = @DIM@, size = 1 << d;
+    if (qra@N@_dimension() != d || qra@N@_coeff_count() != size) return 1;
+    std::vector<double> a(size), b(size), c(size);
+    for (int i = 0; i < d; ++i) {
+        a.assign(size, 0); a[1 << i] = 1;
+        if (qra@N@_geometric_dense(a.data(), a.data(), c.data())) return 2;
+        for (int k = 0; k < size; ++k) if (c[k] != (k == 0 ? 1.0 : 0.0)) return 3;
+    }
+    a.assign(size, 0); b.assign(size, 0); a[2] = 1; b[1] = 1;
+    if (qra@N@_geometric_dense(a.data(), b.data(), c.data()) || c[3] != -1) return 4;
+    if (qra@N@_outer_dense(a.data(), b.data(), c.data()) || c[3] != -1) return 5;
+    if (qra@N@_inner_dense(a.data(), b.data(), c.data())) return 6;
+    for (double x : c) if (x != 0) return 7;
+    unsigned seed=42;
+    for (int trial=0; trial<32; ++trial) {
+        seed=1664525u*seed+1013904223u; unsigned left=seed & (size-1);
+        seed=1664525u*seed+1013904223u; unsigned right=seed & (size-1);
+        a.assign(size,0); b.assign(size,0); a[left]=1; b[right]=1;
+        if(qra@N@_geometric_dense(a.data(),b.data(),c.data())) return 8;
+        for(int k=0;k<size;++k) if(c[k] != (k==(left^right) ? bladeSign(left,right) : 0)) return 9;
+        if(qra@N@_outer_dense(a.data(),b.data(),c.data())) return 10;
+        for(int k=0;k<size;++k) if(c[k] != (k==(left^right) && !(left&right) ? bladeSign(left,right) : 0)) return 11;
+        if(qra@N@_inner_dense(a.data(),b.data(),c.data())) return 12;
+        const bool contributes=left && right && bits(left^right)==std::abs(bits(left)-bits(right));
+        for(int k=0;k<size;++k) if(c[k] != (k==(left^right) && contributes ? bladeSign(left,right) : 0)) {
+            std::fprintf(stderr,"inner mismatch left=%u right=%u index=%d value=%g\n",left,right,k,c[k]); return 13;
+        }
+    }
+    return 0;
+}

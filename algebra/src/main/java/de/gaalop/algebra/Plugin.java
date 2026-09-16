@@ -85,7 +85,7 @@ public class Plugin extends Observable implements AlgebraStrategyPlugin {
     public static LinkedList<DefinedAlgebra> getDefinedAlgebras() {
         try {
             LinkedList<DefinedAlgebra> result = new LinkedList<>();
-            for (String line: IOUtils.toString(Plugin.class.getResourceAsStream("algebra/definedAlgebras.txt"), "UTF-8").split("\r\n")) {
+            for (String line: IOUtils.toString(Plugin.class.getResourceAsStream("algebra/definedAlgebras.txt"), "UTF-8").split("\\r?\\n")) {
                 String[] parts = line.split(";");
                 if (parts.length == 2) {
                     result.add(new DefinedAlgebra(parts[0], parts[1]));
