@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,8 +46,25 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<CompileResponse> unreadableRequest(HttpMessageNotReadableException error) {
+        return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(CompileResponse.error("400", "Request body is missing or contains invalid JSON."));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CompileResponse> internalError(Exception error) {
+        // Preserve Spring MVC client errors and headers such as Allow (405)
+        // and Accept (415), rather than classifying them as internal failures.
+        if (error instanceof ErrorResponse response && response.getStatusCode().is4xxClientError()) {
+            String detail = response.getBody().getDetail();
+            return ResponseEntity.status(response.getStatusCode())
+                    .headers(response.getHeaders())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(CompileResponse.error(Integer.toString(response.getStatusCode().value()),
+                            detail == null ? "Request rejected." : detail));
+        }
         LOGGER.error("Unhandled REST API error", error);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)

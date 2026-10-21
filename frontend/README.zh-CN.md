@@ -1,60 +1,25 @@
-# 独立前端说明
+# 前端工作台
 
-这个目录是新的独立前端工程，和 `gaalop-rest` 平级存在，不再依赖 Spring Boot 静态资源目录来承载页面。
+Vue 3、Vite、Ant Design Vue 和 Monaco 提供两个工作台：`/gaalop/` 对应 GAALOPWeb，`/quantumgaalop/` 对应 QuantumGAALOP。两者共用后端、导航和文件操作组件，各自保存草稿。
 
-## 技术栈
-
-- Vue 3
-- Vite
-- Ant Design Vue
-- pnpm
-
-## 启动方式
-
-安装依赖：
+## 开发
 
 ```bash
-pnpm install
-```
-
-开发模式：
-
-```bash
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-默认开发地址：
+默认端口为 5173。Vite 将两个页面下的 `/api/` 及根 `/api/` 代理到 `http://localhost:8080/gaalop/api/`。用 `VITE_API_TARGET` 设置后端主机或端口。
 
-```text
-http://localhost:5173
-```
+## 构建
 
-## 后端联调
+- `pnpm build`：组合站点，输出 `dist/`，两个入口共享 `dist/assets/`。
+- `pnpm build:sites`：分别输出 `dist-sites/gaalop/`、`dist-sites/quantumgaalop/`，各自包含 HTML 与 assets。
 
-- Vite 已经把 `/api` 代理到 `http://localhost:8080`
-- 因此前端开发时，只需要保证 `gaalop-rest` 在本地 `8080` 端口启动
+旧根地址和 `workspace` 查询参数转到对应页面。导航采用相邻目录地址，支持 `/ga-application/` 下的部署。Hub 导入参数在跳转时保留。配置见[双站点部署](../docs/two-sites-deployment.md)。
 
-## 生产构建
+## 工作流
 
-```bash
-pnpm build
-```
+三个脚本编辑区对应源码、赋值和可视化选择，两个结果区显示代码和图形。Open 打开脚本并更新函数名，Save 写入授权文件或下载副本，Copy code 复制生成文本。量子默认选择 QCA；模式能力与后端保持一致。
 
-构建产物位于：
-
-```text
-frontend/dist
-```
-
-## 当前页面范围
-
-当前只实现了 `Online Editing` 主页面，包含：
-
-- 顶部导航
-- 左侧功能栏
-- 参数配置区
-- 三块脚本编辑区
-- 编译结果区
-- 可视化预览区
-
-页面已移除 `Visualization Plugin` 配置项，并使用与后端一致的 `Output Mode`。
+前端检查脚本位于 `scripts/test-*.mjs`，覆盖文件流程、量子请求、Hub 导入和地址转换。

@@ -1,6 +1,6 @@
 # QCA 概率可视化与 Q bit GA 核查
 
-2026-09-16。QCA 可视化接入范围为 1–3 qubit，沿用三个 GAALOPScript 编辑区和既有概率图组件。
+2026-10-20 更新：QCA 当前支持 1–5 qubit，沿用三个 GAALOPScript 编辑区和既有概率图组件。4、5 位扩展的工作负载、2GB 容器测量和使用边界见 [QCA 位数扩展验证](qca-qubit-expansion.md)。2026-09-16 初次接入范围为 1–3 qubit，下面的初次验证记录保留历史范围。
 
 ## 数学约定
 

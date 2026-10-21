@@ -1,69 +1,38 @@
-# GAALOP Forge: Geometric Algebra Compilation and Intelligent Computing
+# GAALOP Forge
 
-**English** | [简体中文](./README.zh-CN.md)
+GAALOP Forge brings the [GAALOP compiler](https://github.com/CallForSanity/Gaalop) to the browser. Write GAALOPScript, generate source code, and inspect geometric objects or quantum-state probabilities.
 
-**GAALOP Forge** is a platform for compiling, optimizing, generating, and
-visualizing geometric algebra programs. It extends
-[GAALOP (Geometric Algebra Algorithms Optimizer)](https://github.com/CallForSanity/Gaalop)
-with a Spring Boot REST service and a Vue 3 online workbench.
+The project has two workbenches:
 
-Developers can describe geometric algebra algorithms in GAALOPScript, select an
-algebra space, optimization strategy, and target language, and receive generated
-code together with an interactive ganja.js visualization. The platform supports
-rapid geometric-computing prototypes, education, cross-language code generation,
-computer graphics, robotics, and engineering applications.
+| Workbench | Entry | Use |
+| --- | --- | --- |
+| GAALOPWeb | `/gaalop/` | Geometric algebra compilation and ganja.js previews |
+| QuantumGAALOP | `/quantumgaalop/` | QCA, QRA and quantum bit geometric algebra |
 
-> The primary usable interface is currently **Online Editing**. History, Help,
-> and GA-CodeAgent are reserved for future development.
+Both pages share a Spring Boot API. Each page has its own startup module and browser drafts.
 
-## User Interface
+![GAALOPWeb](docs/gaalop-online-editor.png)
 
-![GAALOP Forge online compiler](./docs/gaalop-online-editor.png)
+## Run with Docker
 
-A typical workflow is:
-
-1. Select the algebra space, code generator, optimization, and output mode.
-2. Write GAALOPScript in **Code to Optimize**.
-3. Enter optional visualization values and multivectors.
-4. Select **Run** to inspect generated code and the ganja.js preview.
-
-## How It Works
-
-```mermaid
-flowchart LR
-    A["Vue 3 online editor"] -->|POST /api/v1/compile| B["Spring Boot REST API"]
-    B --> C["GAALOPScript parsing"]
-    C --> D["Algebra expansion and TBA/GAPP optimization"]
-    D --> E["Target-language generation"]
-    D --> F["ganja.js visualization script"]
-    E --> G["Browser result panels"]
-    F --> G
-```
-
-Key capabilities:
-
-- Supports CGA, PGA, STA, DCGA, and other algebra spaces.
-- Generates Java, C/C++, C#, Python, Rust, Julia, MATLAB, LaTeX, and Verilog.
-- Exposes the public integration endpoint `POST /api/v1/compile`.
-- Provides common subexpression elimination (CSE) and optional Maxima
-  symbolic optimization.
-- Returns target code and visualization scripts separately.
-- Provides English, Chinese, and German OpenAPI documentation.
-
-## Quick Start With Docker
-
-The Docker image contains the frontend, backend, Nginx, JRE 17, and Maxima.
-Install Docker Desktop or another Docker environment with Compose support.
-
-Pull and run the Docker Hub image:
+Version **1.2.0** includes the two workbenches, MATLAB symbolic-array fixes, Python math imports, QCA up to five qubits, and a Web runtime with desktop plugins removed.
 
 ```bash
-docker pull gagislab/gaalop-forge:1.0.0
+docker pull gagislab/gaalop-forge:1.2.0
 docker run -d --name gaalop-forge -p 18080:8080 \
   -e GAALOP_SWAGGER_USERNAME=admin \
   -e GAALOP_SWAGGER_PASSWORD=change-me \
-  gagislab/gaalop-forge:1.0.0
+  gagislab/gaalop-forge:1.2.0
 ```
+
+| Service | URL |
+| --- | --- |
+| GAALOPWeb | <http://localhost:18080/gaalop/> |
+| QuantumGAALOP | <http://localhost:18080/quantumgaalop/> |
+| Health | <http://localhost:18080/api/v1/health> |
+| Swagger UI | <http://localhost:18080/swagger-ui.html> |
+
+Swagger uses HTTP Basic authentication. Set its username and password through the environment or a Git-ignored `.env` file. The image includes Java 17, Nginx, Maxima and Linux x86_64 QRA libraries.
 
 To build from source:
 
@@ -71,228 +40,118 @@ To build from source:
 git clone https://github.com/GAGIS-Lab/gaalop-forge.git
 cd gaalop-forge
 cp .env.example .env
-# Edit .env and set the Swagger username and password.
 docker compose up -d --build
 ```
 
-Open the services after startup:
+[Docker build and release](docs/docker-release.md) covers source builds, artifact assembly and verification.
 
-| Service | URL |
-|---|---|
-| Online editor | <http://localhost:18080/> |
-| Swagger UI | <http://localhost:18080/swagger-ui.html> |
-| Health check | <http://localhost:18080/api/v1/health> |
+## Use the workbenches
 
-Swagger uses HTTP Basic authentication. The local defaults are `GACRAC` and
-`GAGIS`. Before public deployment, set `GAALOP_SWAGGER_USERNAME` and
-`GAALOP_SWAGGER_PASSWORD` through the shell or a Git-ignored `.env` file. See
-[`.env.example`](./.env.example).
+1. Select the algebra, output language and output mode.
+2. Enter GAALOPScript in **Code to Optimize**, or use **Open** to load a `.gs` file. The file name sets the function name.
+3. Enter numeric values in **Variable Assignments** and select states or objects in **Multivectors to be Visualized**.
+4. Choose **Run**. The lower panels show generated code and visualization results.
+
+**Save** writes to an authorized file when the browser supports native file access; other browsers download a copy. Generated files use the function name and language extension. The file picker controls their destination. **Copy code** copies generated text to the clipboard.
+
+### Quantum modes
+
+| Mode | Qubits | Generated code | Visualization |
+| --- | --- | --- | --- |
+| QCA | 1–5 | Functions retain free parameters | Basis probabilities and amplitudes |
+| QRA | 2–9 | Constants from native numeric evaluation | Basis probabilities and amplitudes |
+| quantum bit geometric algebra | Bundled fixed algebra | TBA code generation | Code generation mode |
+
+QuantumGAALOP starts with QCA for a new workspace and restores the algebra of an existing draft. Mark a state with `:psi;`, using the variable name from your script. QCA uses **Variable Assignments** for visualization; QRA uses those values for numeric execution in every output mode. Probability displays include the total probability and projection residual.
+
+The quantum toolbar offers 13 output generators, including MATLAB, Python, Java, C/C++, C#, Rust, Julia and Mathematica. The MATLAB generator supports numeric and symbolic scalar inputs, intermediate arrays and multiple outputs. Python uses standard-library math functions for scalar code and NumPy for array output.
+
+Capacity measurements use specific scripts and single requests. See [QCA expansion](docs/qca-qubit-expansion.md), [QRA nine-qubit measurements](docs/qra-9qubit-memory.md) and [resource-script tests](docs/qra-resource-script-tests.md) for workloads, memory and timings.
+
+### Traditional optimization
+
+GAALOPWeb exposes TBA, CSE and Maxima options. CSE removes repeated expressions; Maxima performs symbolic simplification. For a local Maxima installation, set `GAALOP_MAXIMA_COMMAND` or pass `--gaalop.maxima.command=/path/to/maxima` when starting Java.
+
+## Develop locally
+
+Use JDK 17, Maven 3.9+, Node.js 22 and pnpm 10.25.0.
 
 ```bash
-docker compose ps
-docker logs -f gaalop-forge
-docker compose down
-```
-
-## Local Development
-
-| Tool | Recommended version | Purpose |
-|---|---:|---|
-| JDK | 17 | Build and run Spring Boot |
-| Maven | 3.9+ | Build the Java multi-module project |
-| Node.js | 22 LTS | Run frontend tooling |
-| pnpm | 10.25.0 | Manage frontend dependencies and scripts |
-| Maxima | Optional | Required only for Maxima optimization |
-
-### Start the Backend
-
-Run from the repository root:
-
-```bash
-mvn -pl gaalop-rest -am -DskipTests package
+mvn -pl gaalop-rest -am package
 java -jar gaalop-rest/target/gaalop-rest-1.0.0.jar
 ```
 
-The backend listens on <http://localhost:8080>. To use a local Maxima
-installation, specify its executable:
+The standalone service listens on `8080` with context path `/gaalop`. Its health URL is <http://localhost:8080/gaalop/api/v1/health>.
+
+In `frontend/`:
 
 ```bash
-java -jar gaalop-rest/target/gaalop-rest-1.0.0.jar \
-  --gaalop.maxima.command=/path/to/maxima
-```
-
-### Start the Frontend
-
-```bash
-cd frontend
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Vite proxies `/api` to `http://localhost:8080` by default. Override the target
-when the backend is hosted elsewhere:
+Open <http://localhost:5173/gaalop/> or <http://localhost:5173/quantumgaalop/>. Vite proxies API requests to the standalone backend. Set `VITE_API_TARGET` to change its host or port.
 
-```powershell
-$env:VITE_API_TARGET="http://localhost:8080"
-pnpm dev
-```
+`pnpm build` creates the combined site in `frontend/dist/`. `pnpm build:sites` creates self-contained sites in `frontend/dist-sites/gaalop/` and `frontend/dist-sites/quantumgaalop/`. See [two-site deployment](docs/two-sites-deployment.md).
 
-```bash
-VITE_API_TARGET=http://localhost:8080 pnpm dev
-```
+The default Maven reactor builds the Web service and shared compiler tests. Use `-Pdesktop` to build legacy desktop entry points and distribution. Shared mathematical tests still use `codegen-visualizer`; the REST JAR excludes its desktop runtime. See [build boundaries](docs/desktop-web-gap-review.md).
 
-Open <http://localhost:5173/>. Create a production build with `pnpm build`;
-the output is written to `frontend/dist/`.
+### REST example
 
-## Enable CSE and Maxima Optimization
-
-The optimization controls apply to GAALOP's TBA (Table-Based Approach)
-pipeline. Maxima is the computer algebra system used for symbolic
-simplification.
-
-### Configure in the Interface
-
-Use the **Optimization** selector:
-
-| Interface option | CSE | Maxima | Behavior |
-|---|:---:|:---:|---|
-| `Table-Based Approach` | Off | Off | Basic TBA optimization |
-| `Table-Based + CSE` | On | Off | Eliminates repeated subexpressions |
-| `Table-Based + Maxima` | Off | On | Applies symbolic simplification |
-| `Table-Based + CSE + Maxima` | On | On | Enables both optimizations |
-
-CSE needs no external program. Maxima is already installed and configured in
-the Docker image.
-
-### Configure Local Maxima
-
-Install Maxima and place it on `PATH`, or pass its executable when starting the
-backend:
-
-```bash
-java -jar gaalop-rest/target/gaalop-rest-1.0.0.jar \
-  --gaalop.maxima.command=/path/to/maxima
-```
-
-Windows example:
-
-```powershell
-java -jar gaalop-rest/target/gaalop-rest-1.0.0.jar `
-  --gaalop.maxima.command="C:\Program Files\Maxima\bin\maxima.bat"
-```
-
-The same value can be set in
-`gaalop-rest/src/main/resources/application.properties` before rebuilding:
-
-```properties
-gaalop.maxima.command=tools/maxima/bin/maxima.bat
-```
-
-Relative paths are resolved from the backend working directory. Leave this
-setting empty when Maxima optimization is not used.
-
-### Configure Through the REST API
-
-Control the optimizations independently:
-
-```json
-"optimization": {
-  "cse": true,
-  "maxima": true
-}
-```
-
-Set only `cse` for CSE, only `maxima` for symbolic optimization, or set both to
-`false` for basic TBA optimization.
-
-## REST API Example
-
-```http
-POST /api/v1/compile
-Content-Type: application/json
-```
+For the Docker deployment, send this request to `http://localhost:18080/api/v1/compile`. For standalone Java, use `http://localhost:8080/gaalop/api/v1/compile`.
 
 ```json
 {
   "algebraPlugins": "ALGEBRA_CGA",
-  "codegenPlugins": "JAVA",
+  "codegenPlugins": "MATLAB",
   "outputMode": "CODE_AND_VISUALIZATION",
-  "optimization": {
-    "cse": false,
-    "maxima": false
-  },
+  "optimization": { "cse": false, "maxima": false },
   "script": {
     "functionName": "sphereDemo",
-    "optimizeCode": "?x=createPoint(a1,a2,a3);\n?S=x-0.5*(r*r)*einf;",
-    "variableAssignments": "a1=0; a2=0; a3=0; r=0.5;",
+    "optimizeCode": "?S=createPoint(a,b,c)-0.5*r*r*einf;",
+    "variableAssignments": "a=0;b=0;c=0;r=0.5;",
     "multivectorsVisualized": ":Blue;\n:S;"
   }
 }
 ```
 
-`optimizeResult` contains the generated source code and `visualizationCode`
-contains the ganja.js core script. Swagger UI documents all fields and values.
+`optimizeResult` contains generated code; `visualizationCode` contains the geometric preview script. Quantum results include amplitudes, probabilities, total probability and residual. Swagger documents the request and response fields in English, Chinese and German.
 
-### Common Values
-
-| Category | Values |
-|---|---|
-| Algebra spaces | `ALGEBRA_2D`, `ALGEBRA_3D`, `ALGEBRA_2D_PGA`, `ALGEBRA_3D_PGA`, `ALGEBRA_CRA`, `ALGEBRA_STA`, `ALGEBRA_CGA`, `ALGEBRA_GAC`, `ALGEBRA_DCGA`, `ALGEBRA_CCGA`, `ALGEBRA_QGA` |
-| Output modes | `CODE_ONLY`, `CODE_AND_VISUALIZATION`, `VISUALIZATION_ONLY` |
-| Code generators | `JAVA`, `CPP`, `CSHARP`, `PYTHON`, `RUST`, `JULIA`, `MATLAB`, `MATHEMATICA`, `LATEX`, `VERILOG`, `DOT`, `GANJA`, `GAPP`, and others |
-
-## Project Structure
-
-```text
-frontend/                   Vue 3 + Vite online editor
-gaalop-rest/                Spring Boot REST API and compile history
-api/                        Compiler API and intermediate representation
-clucalc/                    GAALOPScript parser
-algebra/                    Built-in algebra definitions
-tba/, gapp/                 Optimization pipelines
-codegen-*/                  Target-language generators
-visualCodeInserter/         Traditional visualization insertion
-ganjaVisualCodeInserter/    ganja.js visualization insertion
-testbenchTbaGapp/           Cross-module compiler tests
-docker/                     Nginx and container startup scripts
-docs/gaalopscript-analysis/ In-depth GAALOPScript documentation
-```
-
-Additional documentation:
-
-- [GAALOPScript syntax rules](./GAALOPScript_Rules.md)
-- [GAALOPScript analysis overview](./docs/gaalopscript-analysis/00-分析总览.md)
-- [Project architecture](./docs/gaalopscript-analysis/01-项目架构.md)
-- [Complete language reference](./docs/gaalopscript-analysis/02-完整语言参考.md)
-- [Contributor guide](./AGENTS.md)
-
-## Testing and Troubleshooting
+## Tests and maintenance
 
 ```bash
 mvn clean test
-mvn -pl gaalop-rest -am test
-cd frontend && pnpm build
+cd frontend
+node scripts/test-quantum.mjs
+node scripts/test-file-access.mjs
+node scripts/test-script-file.mjs
+node scripts/test-workspace-import.mjs
+node scripts/test-workspace-navigation.mjs
+pnpm build
 ```
 
-- **Frontend reaches the wrong service:** check `VITE_API_TARGET` and restart Vite.
-- **Maxima optimization fails:** verify `gaalop.maxima.command`.
-- **Port conflict:** local backend and frontend ports are `8080` and `5173`;
-  Docker exposes the application on `18080`.
-- **First Maven build is slow:** the multi-module build downloads many compiler
-  and code-generation dependencies.
+For QRA integration tests, pass `-Dgaalop.garamon.nativeDir=<native-library-directory>`. [Native maintenance](docs/qra-acceleration-maintenance.md) covers Linux builds and the C ABI. Compiler tests use JUnit 4; the MATLAB and Python folders also contain executable target-language fixtures.
 
-Compile history is disabled by default because it contains submitted scripts
-and generated results. Enable it with
-`GAALOP_COMPILE_HISTORY_ENABLED=true` and define access and retention policies
-for production deployments.
+The systemd health probe uses `/gaalop/api/v1/health`, waits through startup and retries transient failures. It reports URL/access errors as configuration issues and uses a normal service restart after repeated connection or server failures. Installation and verification steps are in [server deployment](deploy/ubuntu/README.md).
 
-## Acknowledgments
+Compile history is opt-in through `GAALOP_COMPILE_HISTORY_ENABLED=true`. History files contain submitted scripts and generated results.
 
-This work was completed by **Wang Jian** at the Nanjing **Geometric Algebra Computing Research and Application Center**, under the guidance of **Yu Zhaoyuan**, **Luo Wen**, and **Dietmar Hildenbrand**.
+## Project layout
 
-## License
+| Directory | Contents |
+| --- | --- |
+| `frontend/` | Vue 3, Ant Design Vue and Monaco workbenches |
+| `gaalop-rest/` | Spring Boot API |
+| `api/`, `clucalc/`, `algebra/` | Compiler model, parser and algebra definitions |
+| `tba/`, `gapp/`, `codegen-*/` | Optimization and output generators |
+| `native/qra/`, `garamon/` | QRA native libraries and Java bridge |
+| `testbenchTbaGapp/` | Compiler regression tests |
+| `docker/`, `deploy/` | Image assembly and server deployment |
 
-This project extends the original GAALOP project and is primarily distributed
-under LGPL 3.0. The repository also contains components with separate licenses.
-Review `LICENSE`, `LICENSE_ganjajs`, `LICENSE_iamath`, and `NOTICE.md` before
-redistribution or modification.
+More: [GAALOPScript rules](GAALOPScript_Rules.md), [language reference](docs/gaalopscript-analysis/02-完整语言参考.md), [MATLAB compatibility](docs/matlab-symbolic-codegen.md), [Python compatibility](docs/python-codegen-compatibility.md), [Open/Save](docs/browser-open-save.md), [1.2.0 changes](docs/releases/1.2.0.md).
+
+## Acknowledgments and license
+
+Wang Jian developed this project at the Nanjing Geometric Algebra Computing Research and Application Center, under the guidance of Yu Zhaoyuan, Luo Wen and Dietmar Hildenbrand.
+
+The project extends GAALOP and uses LGPL 3.0. Component licenses are listed in [LICENSE](LICENSE), [LICENSE_ganjajs](LICENSE_ganjajs), [LICENSE_iamath](LICENSE_iamath) and [NOTICE.md](NOTICE.md).

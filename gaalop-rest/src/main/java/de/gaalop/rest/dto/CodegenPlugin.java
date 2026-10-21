@@ -28,6 +28,11 @@ public enum CodegenPlugin {
         this.pluginName = pluginName;
     }
 
+    /** These legacy plugins require an interactive desktop, including Verilog's settings dialog. */
+    public boolean requiresDesktopUi() {
+        return this == VERILOG || this == GAPP_DEBUGGER || this == VIS2D || this == VISUALIZER;
+    }
+
     public String getPluginName() {
         return pluginName;
     }

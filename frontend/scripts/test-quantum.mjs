@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
-import { algebraModes, buildRequest, draftKeyFor, initialForm, validateResults } from "../src/quantum/model.js";
-const form = initialForm();
-const request = buildRequest(form);
+import { algebraModes, algebraSelectionKey, buildRequest, defaultAlgebra, draftKeyFor, initialAlgebra, initialForm, validateResults } from "../src/quantum/model.js";
+const form = initialForm("QRA");
+const request = buildRequest(form, "QRA");
 assert.equal(request.script.variableAssignments, form.variableAssignments);
 assert.equal(request.script.multivectorsVisualized, ":psi;");
 assert.equal(request.algebraDimension, 2);
 assert.equal(request.visualizationEnabled, true);
 assert.deepEqual(request.optimization, { cse: false, maxima: false });
 form.outputMode = "CODE_ONLY";
-assert.equal(buildRequest(form).visualizationEnabled, false);
-assert.equal(buildRequest(form).script.variableAssignments, form.variableAssignments);
+assert.equal(buildRequest(form, "QRA").visualizationEnabled, false);
+assert.equal(buildRequest(form, "QRA").script.variableAssignments, form.variableAssignments);
 const state = { nqubits: 2, labels: ["00", "01", "10", "11"], real: [1, 0, 0, 0], imaginary: [0, 0, 0, 0], probabilities: [1, 0, 0, 0], totalProbability: 1, residualNorm: 0 };
 assert.deepEqual(validateResults({ psi: state }, 2), { psi: state });
 assert.deepEqual(validateResults({}, 2), {});
@@ -31,7 +31,7 @@ for (const mode of ["QGA"]) {
   assert.notEqual(draftKeyFor(mode), draftKeyFor("QRA"));
   if (mode === "QGA") assert.equal("algebraDimension" in request, false);
 }
-assert.deepEqual(algebraModes.QCA.dimensions, [1, 2, 3]);
+assert.deepEqual(algebraModes.QCA.dimensions, [1, 2, 3, 4, 5]);
 assert.deepEqual(algebraModes.QGA.dimensions, []);
 assert.notEqual(draftKeyFor("QCA"), draftKeyFor("QGA"));
 const qca = buildRequest(initialForm("QCA"), "QCA");
@@ -39,4 +39,18 @@ assert.equal(qca.visualizationEnabled, true);
 assert.equal(qca.script.multivectorsVisualized, ":psi;");
 assert.ok(qca.script.variableAssignments.includes("theta"));
 assert.equal(algebraModes.QCA.numeric, false);
-console.log("QCA and Q bit GA capability and draft isolation checks passed.");
+assert.equal(defaultAlgebra, "QCA");
+assert.equal(buildRequest(initialForm()).algebraPlugins, "ALGEBRA_QCA");
+const storage = entries => ({ getItem: key => entries[key] ?? null });
+assert.equal(initialAlgebra(storage({})), "QCA");
+for (const mode of Object.keys(algebraModes)) {
+  const legacy = { [draftKeyFor(mode)]: JSON.stringify(initialForm(mode)) };
+  assert.equal(initialAlgebra(storage(legacy)), mode);
+  assert.equal(initialAlgebra(storage({ ...legacy, [algebraSelectionKey]: "QRA" })), "QRA");
+}
+const saved = Object.fromEntries(Object.keys(algebraModes).map(mode => [draftKeyFor(mode), JSON.stringify(initialForm(mode))]));
+assert.equal(initialAlgebra(storage(saved)), "QCA");
+for (const mode of Object.keys(algebraModes)) assert.equal(initialAlgebra(storage({ ...saved, [algebraSelectionKey]: mode })), mode);
+assert.equal(initialAlgebra(storage({ [algebraSelectionKey]: "__proto__", [draftKeyFor("QRA")]: "broken JSON" })), "QCA");
+assert.equal(initialAlgebra({ getItem() { throw new Error("Storage blocked"); } }), "QCA");
+console.log("QCA defaults, previous algebra selection, legacy drafts and blocked storage checks passed.");

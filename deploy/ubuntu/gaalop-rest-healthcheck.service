@@ -3,4 +3,5 @@ Description=Check Gaalop REST health and restart it when unhealthy
 
 [Service]
 Type=oneshot
+EnvironmentFile=-/etc/default/gaalop-rest-healthcheck
 ExecStart=/usr/local/bin/gaalop-rest-healthcheck.sh

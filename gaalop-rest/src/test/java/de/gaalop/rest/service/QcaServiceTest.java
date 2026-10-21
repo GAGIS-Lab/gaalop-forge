@@ -50,7 +50,7 @@ public class QcaServiceTest {
 
     @Test
     public void invalidDimensionAndVisualizationAreRejected() throws Exception {
-        for (int n : new int[]{-1, 0, 4, Integer.MAX_VALUE}) {
+        for (int n : new int[]{-1, 0, 6, Integer.MAX_VALUE}) {
             CompileRequest request = request();
             request.setAlgebraDimension(n);
             assertThrows(IllegalArgumentException.class, () -> service.compile(request));

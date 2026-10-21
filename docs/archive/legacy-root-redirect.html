@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>正在跳转</title>
+    <script>
+      (() => {
+        const target = /^#\/editor(?:[/?]|$)/i.test(window.location.hash)
+          ? "http://gacrac.gagis.cn/ga-application/gaalop/"
+          : "http://gacrac.gagis.cn/";
+
+        window.location.replace(target);
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to new website...</p>
+  </body>
+</html>

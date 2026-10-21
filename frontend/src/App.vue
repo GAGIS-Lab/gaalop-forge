@@ -24,22 +24,27 @@
       </aside>
 
       <main v-show="activeView === 'online'" class="workspace">
+        <WorkspaceImport workspace="traditional" :busy="running || fileLoading || codeSaving" @import="importWorkspace" />
         <section ref="toolbarPanelRef" class="toolbar-panel">
-          <a-row :gutter="[18, 16]" align="middle">
-            <a-col :xxl="3" :xl="4" :lg="4" :md="24" :sm="24" :xs="24">
+          <div class="toolbar-layout">
+            <div class="toolbar-actions">
               <div class="run-stack">
-                <button class="run-button" type="button" :disabled="running" @click="runCompilation">
+                <button class="run-button" type="button" :disabled="running || fileLoading || codeSaving" @click="runCompilation">
                   <LoadingOutlined v-if="running" />
                   <CaretRightFilled v-else />
                   <span>{{ running ? "Running" : "Run" }}</span>
                 </button>
-                <div class="save-hint">{{ saveHint }}</div>
+                <div class="script-file-actions">
+                  <FileOpenButton :disabled="running || fileLoading || codeSaving" @open="openScript" />
+                  <FileSaveButton label="script" :disabled="running || fileLoading || codeSaving" :busy="scriptSaving" @save="saveScript()" />
+                  <input ref="scriptFileInput" type="file" accept=".gs,.txt,text/plain" hidden @change="uploadScript" />
+                </div>
               </div>
-            </a-col>
+            </div>
 
-            <a-col :xxl="21" :xl="20" :lg="20" :md="24" :sm="24" :xs="24">
-              <a-row :gutter="[18, 14]">
-                <a-col :xxl="5" :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
+            <div class="toolbar-settings">
+              <div class="toolbar-fields">
+                <div class="toolbar-field">
                   <label class="field-label">Algebra Type</label>
                   <a-select
                     v-model:value="form.algebraPlugins"
@@ -48,8 +53,8 @@
                     :options="algebraOptions"
                     @change="markDirty"
                   />
-                </a-col>
-                <a-col :xxl="4" :xl="5" :lg="5" :md="12" :sm="24" :xs="24">
+                </div>
+                <div class="toolbar-field">
                   <label class="field-label">Code Generation</label>
                   <a-select
                     v-model:value="form.codegenPlugins"
@@ -58,8 +63,8 @@
                     :options="codegenOptions"
                     @change="markDirty"
                   />
-                </a-col>
-                <a-col :xxl="4" :xl="5" :lg="5" :md="12" :sm="24" :xs="24">
+                </div>
+                <div class="toolbar-field">
                   <label class="field-label">Optimization</label>
                   <a-select
                     v-model:value="form.optimizationPreset"
@@ -68,8 +73,8 @@
                     :options="optimizationOptions"
                     @change="markDirty"
                   />
-                </a-col>
-                <a-col :xxl="4" :xl="5" :lg="4" :md="12" :sm="24" :xs="24">
+                </div>
+                <div class="toolbar-field">
                   <label class="field-label">Output Mode</label>
                   <a-select
                     v-model:value="form.outputMode"
@@ -78,18 +83,18 @@
                     :options="outputModeOptions"
                     @change="markDirty"
                   />
-                </a-col>
-                <a-col :xxl="4" :xl="3" :lg="4" :md="12" :sm="24" :xs="24">
+                </div>
+                <div class="toolbar-field">
                   <label class="field-label">Function Name</label>
                   <div class="function-input-wrap">
                     <a-input v-model:value="form.functionName" size="large" class="toolbar-input" @input="markDirty" />
                     <CheckOutlined v-if="functionNameValid" class="function-valid-icon" />
                     <CloseCircleOutlined v-else class="function-invalid-icon" />
                   </div>
-                </a-col>
-              </a-row>
-            </a-col>
-          </a-row>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="editor-grid">
@@ -186,12 +191,10 @@
                     </span>
                   </div>
                   <div class="result-tools">
-                    <button class="icon-button" type="button" @click="copyText(displayedCode)">
-                      <CopyOutlined />
+                    <button class="icon-button copy-code-button" type="button" title="Copy generated code to the clipboard" :disabled="!displayedCode" @click="copyText(displayedCode)">
+                      <CopyOutlined /><span>Copy code</span>
                     </button>
-                    <button class="icon-button" type="button" @click="downloadCode">
-                      <DownloadOutlined />
-                    </button>
+                    <FileSaveButton label="generated code" compact :disabled="!result.optimizeResult || codeSaving || fileLoading" :busy="codeSaving" @save="saveCode()" />
                   </div>
                 </div>
                 <div class="code-surface result-surface">
@@ -261,8 +264,16 @@
 </template>
 
 <script setup>
+import { message } from "ant-design-vue";
+import ganjaScriptUrl from "../../codegen-ganja/src/main/resources/de/gaalop/ganja/ganja.js?url";
+import { functionNameFromFile, isValidFunctionName, parseScriptFile, serializeScriptFile } from "./scriptFile.js";
 import WorkspaceHeader from "./components/WorkspaceHeader.vue";
+import FileSaveButton from "./components/FileSaveButton.vue";
+import FileOpenButton from "./components/FileOpenButton.vue";
+import { canPickScriptFile, createTextFileSession, pickScriptFile, suggestedFileName } from "./fileAccess.js";
+import { chooseSaveName, reportFileSave } from "./fileDialogs.js";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import WorkspaceImport from "./components/WorkspaceImport.vue";
 import {
   CaretRightFilled,
   CheckOutlined,
@@ -270,7 +281,6 @@ import {
   CopyOutlined,
   DoubleLeftOutlined,
   DownOutlined,
-  DownloadOutlined,
   FileTextOutlined,
   FullscreenOutlined,
   HistoryOutlined,
@@ -297,16 +307,12 @@ const algebraOptions = [
 const codegenOptions = [
   { value: "CLUCALC", label: "CLUCalc" },
   { value: "JULIA", label: "Julia" },
-  { value: "VERILOG", label: "Verilog" },
-  { value: "GAPP_DEBUGGER", label: "GAPP Debugger" },
   { value: "CSHARP", label: "C#" },
   { value: "RUST", label: "Rust" },
   { value: "JAVA", label: "Java" },
-  { value: "VIS2D", label: "VIS2D" },
   { value: "GAALET_OUTPUT", label: "Gaalet Output" },
   { value: "GAPP", label: "GAPP" },
   { value: "COMPRESSED", label: "Compressed" },
-  { value: "VISUALIZER", label: "Visualizer" },
   { value: "GANJA", label: "Ganja" },
   { value: "GAPP_OPENCL", label: "GAPP OpenCL" },
   { value: "PYTHON", label: "Python" },
@@ -333,16 +339,12 @@ const outputModeOptions = [
 const codegenFileExtensions = {
   CLUCALC: "clu",
   JULIA: "jl",
-  VERILOG: "v",
-  GAPP_DEBUGGER: "gapp",
   CSHARP: "cs",
   RUST: "rs",
   JAVA: "java",
-  VIS2D: "vis2d",
   GAALET_OUTPUT: "cpp",
   GAPP: "gapp",
   COMPRESSED: "txt",
-  VISUALIZER: "html",
   GANJA: "js",
   GAPP_OPENCL: "cl",
   PYTHON: "py",
@@ -487,7 +489,9 @@ const multivectorEditorContainer = ref(null);
 const result = reactive({
   optimizeResult: "",
   visualizationCode: "",
-  lastSuccessAt: null
+  lastSuccessAt: null,
+  codeFilename: "",
+  codeBinding: ""
 });
 
 const runState = reactive({
@@ -547,16 +551,8 @@ const futurePages = {
   }
 };
 
-const functionNameValid = computed(() => /^[A-Za-z_$-][A-Za-z0-9_$-]*$/.test(form.functionName.trim()));
-const saveHint = computed(() => {
-  if (running.value) {
-    return "Compiling with backend API...";
-  }
-  if (dirty.value) {
-    return "You have unpublished changes";
-  }
-  return "All changes saved";
-});
+const functionNameValid = computed(() => isValidFunctionName(form.functionName));
+
 
 const statusAlertType = computed(() => {
   if (running.value) {
@@ -659,7 +655,6 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const compileUrl = apiBaseUrl
   ? `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/compile`
   : new URL("api/v1/compile", pageBaseUrl).href;
-const ganjaScriptUrl = new URL("ganja.js", pageBaseUrl).href;
 
 function buildRequestBody() {
   return {
@@ -677,6 +672,74 @@ function buildRequestBody() {
   };
 }
 
+const scriptFileInput = ref(null);
+const fileLoading = ref(false), scriptSaving = ref(false), codeSaving = ref(false);
+const scriptFile = createTextFileSession({ pickerId: "gaalop-script", description: "GAALOPScript", chooseName: chooseSaveName });
+const codeFile = createTextFileSession({ pickerId: "gaalop-output", description: "Generated code", chooseName: chooseSaveName });
+async function applyScriptFile(file, handle, algebra) {
+  if (file.size > 1024 * 1024) throw new Error("脚本文件不能超过 1 MiB。");
+  const script = parseScriptFile(await file.text());
+  if (running.value || form.algebraPlugins !== algebra) throw new Error("工作区已变更，请重新打开脚本。");
+  // This import is part of the ongoing file operation, not a concurrent Hub import.
+  applyWorkspace({ algebraPlugins: algebra, script });
+  scriptFile.attach(handle, file.name, algebra);
+  form.functionName = functionNameFromFile(file.name);
+  if (!functionNameValid.value) message.warning("Script opened. The file name is not a valid function name; correct Function Name before running.");
+}
+async function openScript() {
+  if (running.value || fileLoading.value || codeSaving.value) return;
+  // Keep the ordinary input picker directly in the user's click gesture.
+  if (!canPickScriptFile()) { scriptFileInput.value.click(); return; }
+  fileLoading.value = true;
+  const algebra = form.algebraPlugins;
+  try {
+    const selected = await pickScriptFile();
+    if (selected.kind === "fallback") scriptFileInput.value.click();
+    if (selected.kind === "opened") await applyScriptFile(selected.file, selected.handle, algebra);
+  } catch (error) { message.error(error.message); }
+  finally { fileLoading.value = false; }
+}
+async function uploadScript(event) {
+  const file = event.target.files?.[0];
+  event.target.value = "";
+  if (!file || running.value || fileLoading.value) return;
+  fileLoading.value = true;
+  try { await applyScriptFile(file, null, form.algebraPlugins); }
+  catch (error) { message.error(error.message); }
+  finally { fileLoading.value = false; }
+}
+async function saveScript(saveAs = false, downloadOnly = false) {
+  if (running.value || fileLoading.value || codeSaving.value) return;
+  fileLoading.value = true; scriptSaving.value = true;
+  try {
+    reportFileSave(await scriptFile.save({ text: serializeScriptFile(form.script), name: suggestedFileName(form.functionName, "gs"), binding: form.algebraPlugins, saveAs, downloadOnly }));
+  } catch (error) { message.error(error.message); }
+  finally { fileLoading.value = false; scriptSaving.value = false; }
+}
+
+function importWorkspace(entry) {
+  if (running.value || fileLoading.value || codeSaving.value) return;
+  applyWorkspace(entry);
+}
+function applyWorkspace(entry) {
+  scriptFile.reset();
+  codeFile.reset();
+  form.algebraPlugins = entry.algebraPlugins;
+  Object.assign(form.script, entry.script);
+  mainEditor?.setValue(entry.script.optimizeCode);
+  variableEditor?.setValue(entry.script.variableAssignments);
+  multivectorEditor?.setValue(entry.script.multivectorsVisualized);
+  result.optimizeResult = "";
+  result.visualizationCode = "";
+  result.lastSuccessAt = null;
+  result.codeFilename = "";
+  result.codeBinding = "";
+  runState.kind = "idle";
+  runState.message = "";
+  dirty.value = true;
+  showOnlineEditing();
+}
+
 function buildOptimizationFlags(preset) {
   return {
     cse: preset === "CSE" || preset === "CSE_MAXIMA",
@@ -685,7 +748,7 @@ function buildOptimizationFlags(preset) {
 }
 
 async function runCompilation() {
-  if (!functionNameValid.value || running.value) {
+  if (!functionNameValid.value || running.value || fileLoading.value || codeSaving.value) {
     runState.kind = "error";
     runState.message = "Function name is invalid.";
     return;
@@ -696,12 +759,13 @@ async function runCompilation() {
   runState.message = "";
 
   try {
+    const submitted = buildRequestBody();
     const response = await fetch(compileUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(buildRequestBody())
+      body: JSON.stringify(submitted)
     });
 
     const payload = await response.json().catch(() => ({}));
@@ -710,6 +774,8 @@ async function runCompilation() {
     }
 
     result.optimizeResult = payload.optimizeResult || "";
+    result.codeFilename = suggestedFileName(submitted.script.functionName, codegenFileExtensions[submitted.codegenPlugins] || "txt");
+    result.codeBinding = `${submitted.algebraPlugins}:${result.codeFilename}`;
     result.visualizationCode = payload.visualizationCode || "";
     result.lastSuccessAt = Date.now();
     dirty.value = false;
@@ -834,9 +900,9 @@ function buildVisualizationDocument(coreScript) {
         display: none;
       }
 
-      #sliderpanel:empty + .preview-stage,
       .gaalop-preview-shell:has(#sliderpanel:empty) {
         grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
       }
 
       .slideritem {
@@ -885,20 +951,13 @@ async function copyText(text) {
   }
 }
 
-function downloadCode() {
-  const blob = new Blob([displayedCode.value], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = buildDownloadFilename();
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
-
-function buildDownloadFilename() {
-  const baseName = (form.functionName.trim() || "gaalop").replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_");
-  const extension = codegenFileExtensions[form.codegenPlugins] || "txt";
-  return `${baseName}.${extension}`;
+async function saveCode(saveAs = false, downloadOnly = false) {
+  if (!result.optimizeResult || codeSaving.value || fileLoading.value) return;
+  codeSaving.value = true;
+  try {
+    reportFileSave(await codeFile.save({ text: result.optimizeResult, name: result.codeFilename, binding: result.codeBinding, saveAs, downloadOnly }));
+  } catch (error) { message.error(error.message); }
+  finally { codeSaving.value = false; }
 }
 
 function formatRelative(timestamp) {
@@ -1297,3 +1356,27 @@ function extractScriptMacros(script) {
   return [...names].sort((left, right) => left.localeCompare(right));
 }
 </script>
+
+<style scoped>
+.copy-code-button { width: auto; padding: 0 8px; gap: 5px; font-size: 12px; white-space: nowrap; }
+.copy-code-button:disabled { opacity: .5; cursor: not-allowed; }
+.script-file-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.script-file-button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 5px 7px; border: 1px solid #d9e2f2; border-radius: 5px; background: #fff; color: #425675; font-family: inherit; font-size: 12px; line-height: 16px; cursor: pointer; white-space: nowrap; }
+.script-file-button:hover { color: #2455ff; border-color: #8caaff; background: #f5f8ff; }
+.script-file-button:focus-visible { outline: 2px solid #2455ff; outline-offset: 2px; }
+.script-file-button:disabled { opacity: .5; cursor: not-allowed; }
+</style>
+
+<style scoped>
+.toolbar-layout { display: flex; align-items: flex-end; gap: 22px; }
+.toolbar-actions { flex: 0 0 auto; padding-bottom: 1px; }
+.run-stack { flex-direction: row; align-items: center; gap: 10px; }
+.run-stack .run-button { width: 86px; height: 34px; font-size: 14px; gap: 6px; box-shadow: none; }
+.script-file-actions { margin-top: 0; flex-wrap: nowrap; }
+.script-file-button { height: 34px; padding: 0 9px; font-size: 12px; }
+.toolbar-settings { flex: 1; min-width: 0; }
+.toolbar-fields { display: grid; grid-template-columns: 1.35fr 1fr 1.1fr 1.25fr 1fr; gap: 14px; }
+.toolbar-field { min-width: 0; }
+@media (max-width: 1250px) { .toolbar-layout { flex-wrap: wrap; gap: 12px; } .toolbar-settings { flex-basis: 100%; } }
+@media (max-width: 760px) { .toolbar-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+</style>

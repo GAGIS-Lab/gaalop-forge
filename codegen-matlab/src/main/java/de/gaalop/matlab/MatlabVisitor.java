@@ -37,6 +37,7 @@ public class MatlabVisitor extends DefaultCodeGeneratorVisitor {
 
         code.append(")\n");
         indentation++;
+        MatlabSymbolicInitialization.append(graph, code, indentation);
 
         node.getSuccessor().accept(this);
     }

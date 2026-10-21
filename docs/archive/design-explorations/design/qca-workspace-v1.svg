@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" role="img" aria-label="QuantumGAALOP 静态前端设计稿">
+<title>QuantumGAALOP — Static design review v1</title>
+<rect x="0" y="0" width="1600" height="1040" rx="0" fill="#F5F7FB" stroke="#F5F7FB"/>
+<rect x="0" y="0" width="1600" height="70" rx="0" fill="#FFFFFF" stroke="#FFFFFF"/>
+<line x1="0" y1="69" x2="1600" y2="69" stroke="#E7ECF4" stroke-width="1"/>
+<text x="28" y="45" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="28" font-weight="bold" fill="#2455FF">GAALOP</text>
+<text x="236" y="43" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#5A6680">Geometric Algebra</text>
+<text x="450" y="43" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="bold" fill="#147D82">QuantumGAALOP</text>
+<line x1="450" y1="68" x2="602" y2="68" stroke="#147D82" stroke-width="3"/>
+<rect x="1354" y="20" width="218" height="30" rx="5" fill="#F5F7FB" stroke="#E7ECF4"/>
+<text x="1366" y="39" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#52627A">静态设计稿 · 待评审</text>
+<text x="28" y="133" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="31" font-weight="bold" fill="#1F2A44">QuantumGAALOP</text>
+<text x="28" y="162" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#536780">Quantum computing algebra · QCA</text>
+<text x="28" y="188" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#7785A1">编写代数表达式，优化并生成源码。</text>
+<rect x="1402" y="123" width="170" height="36" rx="8" fill="#FFFFFF" stroke="#E7ECF4"/>
+<text x="1415" y="145" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#475C75">Language reference</text>
+<rect x="28" y="214" width="1544" height="102" rx="8" fill="#FFFFFF" stroke="#E7ECF4"/>
+<text x="50" y="242" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#68758C">Qubits</text>
+<text x="262" y="242" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#68758C">Target</text>
+<text x="482" y="242" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#68758C">Optimization</text>
+<text x="794" y="242" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#68758C">Function</text>
+<rect x="50" y="252" width="180" height="42" rx="8" fill="#F5F7FB" stroke="#E7ECF4"/>
+<rect x="53" y="255" width="54" height="36" rx="5" fill="#147D82" stroke="#147D82"/>
+<text x="75" y="278" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="bold" fill="#FFFFFF">1</text>
+<text x="135" y="278" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#68758C">2</text>
+<text x="195" y="278" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#68758C">3</text>
+<rect x="262" y="252" width="184" height="42" rx="6" fill="#FFFFFF" stroke="#D9E1EF"/>
+<text x="278" y="278" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="16" font-weight="normal" fill="#1F2A44">C++</text>
+<text x="420" y="277" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#7785A1">⌄</text>
+<rect x="482" y="252" width="275" height="42" rx="6" fill="#FFFFFF" stroke="#D9E1EF"/>
+<text x="498" y="278" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="16" font-weight="normal" fill="#1F2A44">TBA + CSE</text>
+<text x="730" y="277" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#7785A1">⌄</text>
+<rect x="794" y="252" width="376" height="42" rx="6" fill="#FFFFFF" stroke="#D9E1EF"/>
+<text x="810" y="278" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="16" font-weight="normal" fill="#1F2A44">qca_basics</text>
+<rect x="1366" y="251" width="180" height="44" rx="7" fill="#2455FF" stroke="#2455FF"/>
+<text x="1412" y="278" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="17" font-weight="bold" fill="#FFFFFF">Compile</text>
+<rect x="28" y="332" width="1544" height="54" rx="7" fill="#EFF7F7" stroke="#DDEBEC"/>
+<text x="48" y="363" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#657E85">Algebra</text>
+<text x="111" y="367" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="20" font-weight="bold" fill="#147D82">Cl(3, 1, 0)</text>
+<line x1="247" y1="345" x2="247" y2="373" stroke="#CCDFE1" stroke-width="1"/>
+<text x="267" y="364" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#526C78">4 generators · 16 basis blades</text>
+<rect x="540" y="344" width="59" height="30" rx="5" fill="#E4F3F2" stroke="#BDDEDB"/>
+<text x="552" y="363" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#147D82">ei1</text>
+<rect x="609" y="344" width="59" height="30" rx="5" fill="#E4F3F2" stroke="#BDDEDB"/>
+<text x="621" y="363" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#147D82">ei2</text>
+<rect x="678" y="344" width="51" height="30" rx="5" fill="#E4F3F2" stroke="#BDDEDB"/>
+<text x="690" y="363" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#147D82">f1</text>
+<rect x="739" y="344" width="63" height="30" rx="5" fill="#E4F3F2" stroke="#BDDEDB"/>
+<text x="751" y="363" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#147D82">f1T</text>
+<text x="1237" y="363" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#657E85">基底信息随 qubit 配置更新</text>
+<rect x="28" y="406" width="576" height="552" rx="8" fill="#FFFFFF" stroke="#E7ECF4"/>
+<rect x="620" y="406" width="600" height="552" rx="8" fill="#FFFFFF" stroke="#E7ECF4"/>
+<rect x="1236" y="406" width="336" height="552" rx="8" fill="#FFFFFF" stroke="#E7ECF4"/>
+<text x="50" y="445" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="19" font-weight="bold" fill="#1F2A44">QCA source</text>
+<rect x="50" y="465" width="153" height="30" rx="5" fill="#F5F7FB" stroke="#E7ECF4"/>
+<text x="62" y="484" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#52627A">qca_basics.clu</text>
+<line x1="28" y1="511" x2="604" y2="511" stroke="#E7ECF4" stroke-width="1"/>
+<text x="49" y="552" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#9AA7B8">1</text>
+<text x="85" y="554" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#8493A3">// Auxiliary vectors and imaginary bivector</text>
+<text x="49" y="583" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#9AA7B8">2</text>
+<text x="85" y="585" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#24466B">j = ei1 * ei2;</text>
+<text x="49" y="614" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#9AA7B8">3</text>
+<text x="85" y="616" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#24466B">?square1 = ei1 * ei1;</text>
+<text x="49" y="645" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#9AA7B8">4</text>
+<text x="85" y="647" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#24466B">?square2 = ei2 * ei2;</text>
+<text x="49" y="676" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#9AA7B8">5</text>
+<text x="85" y="678" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#24466B">?imaginarySquare = j * j;</text>
+<text x="49" y="707" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#9AA7B8">6</text>
+<text x="85" y="709" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#24466B">?reverseSum = j + ~j;</text>
+<text x="49" y="738" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#BAC4D1">7</text>
+<text x="49" y="769" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#BAC4D1">8</text>
+<text x="49" y="800" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#BAC4D1">9</text>
+<text x="49" y="831" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#BAC4D1">10</text>
+<text x="49" y="862" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="15" font-weight="normal" fill="#BAC4D1">11</text>
+<line x1="28" y1="916" x2="604" y2="916" stroke="#E7ECF4" stroke-width="1"/>
+<text x="48" y="944" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#7785A1">赋值与参数写在同一脚本中</text>
+<text x="491" y="943" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="12" font-weight="normal" fill="#7785A1">Ln 1, Col 1</text>
+<text x="642" y="445" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="19" font-weight="bold" fill="#1F2A44">Generated code</text>
+<rect x="1044" y="422" width="66" height="30" rx="8" fill="#FFFFFF" stroke="#E7ECF4"/>
+<text x="1059" y="441" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#52627A">Copy</text>
+<rect x="1118" y="422" width="84" height="30" rx="8" fill="#FFFFFF" stroke="#E7ECF4"/>
+<text x="1129" y="441" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#52627A">Download</text>
+<text x="643" y="484" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#68758C">C++ · 1 qubit · qca_basics</text>
+<rect x="1044" y="465" width="154" height="30" rx="5" fill="#F5F7FB" stroke="#E7ECF4"/>
+<text x="1056" y="484" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#52627A">Output example</text>
+<line x1="620" y1="511" x2="1220" y2="511" stroke="#E7ECF4" stroke-width="1"/>
+<text x="644" y="554" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#8493A3">// Scalar coefficient excerpt</text>
+<text x="644" y="585" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#24466B">square1[0] = 1.0;</text>
+<text x="644" y="616" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#24466B">square2[0] = 1.0;</text>
+<text x="644" y="647" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#24466B">imaginarySquare[0] = -1.0;</text>
+<rect x="644" y="693" width="552" height="67" rx="6" fill="#F7F9FC" stroke="#EDF0F6"/>
+<text x="658" y="718" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#697A91">图中仅展示生成源码的示例片段。</text>
+<text x="658" y="741" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#697A91">编译结果绑定提交时的 qubit、语言和函数名。</text>
+<line x1="620" y1="916" x2="1220" y2="916" stroke="#E7ECF4" stroke-width="1"/>
+<text x="641" y="944" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#7785A1">Generated source is not executed here.</text>
+<text x="1256" y="442" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="16" font-weight="bold" fill="#1F2A44">Basis relations</text>
+<text x="1256" y="478" font-family="Cambria, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#147D82">ei1² = ei2² = 1</text>
+<text x="1256" y="506" font-family="Cambria, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#147D82">fi² = fiT² = 0</text>
+<text x="1256" y="534" font-family="Cambria, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#147D82">fi · fiT = 1/2</text>
+<text x="1256" y="562" font-family="Cambria, Microsoft YaHei, sans-serif" font-size="17" font-weight="normal" fill="#147D82">fi fjT + fjT fi = δij</text>
+<line x1="1256" y1="583" x2="1552" y2="583" stroke="#E7ECF4" stroke-width="1"/>
+<text x="1256" y="616" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="16" font-weight="bold" fill="#1F2A44">Operations</text>
+<text x="1260" y="654" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="18" font-weight="normal" fill="#147D82">*</text>
+<text x="1294" y="650" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#52627A">Geometric product</text>
+<text x="1260" y="680" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="18" font-weight="normal" fill="#147D82">.</text>
+<text x="1294" y="676" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#52627A">Inner product</text>
+<text x="1260" y="706" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="18" font-weight="normal" fill="#147D82">^</text>
+<text x="1294" y="702" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#52627A">Outer product</text>
+<text x="1260" y="732" font-family="Consolas, Microsoft YaHei, sans-serif" font-size="18" font-weight="normal" fill="#147D82">~</text>
+<text x="1294" y="728" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#52627A">Reversion</text>
+<line x1="1256" y1="750" x2="1552" y2="750" stroke="#E7ECF4" stroke-width="1"/>
+<text x="1256" y="782" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="16" font-weight="bold" fill="#1F2A44">Algebra examples</text>
+<rect x="1256" y="800" width="296" height="33" rx="5" fill="#EFF7F7" stroke="#D6E8E6"/>
+<text x="1266" y="820" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="bold" fill="#147D82">●  Auxiliary bivector</text>
+<text x="1496" y="818" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="11" font-weight="normal" fill="#68758C">1 qubit</text>
+<text x="1266" y="857" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#52627A">○  Fermionic relations</text>
+<text x="1496" y="855" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="11" font-weight="normal" fill="#68758C">1 qubit</text>
+<text x="1266" y="889" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#52627A">○  Joint idempotent</text>
+<text x="1489" y="887" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="11" font-weight="normal" fill="#68758C">2 qubits</text>
+<rect x="1256" y="911" width="296" height="31" rx="5" fill="#FFFFFF" stroke="#C4D6DA"/>
+<text x="1358" y="930" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="bold" fill="#147D82">Load example</text>
+<text x="28" y="995" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="14" font-weight="normal" fill="#68758C">本工作区编译 QCA 表达式；当前不提供量子态模拟。</text>
+<text x="1279" y="995" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="13" font-weight="normal" fill="#68758C">QCA support: 1–3 qubits</text>
+<text x="28" y="1025" font-family="Segoe UI, Microsoft YaHei, sans-serif" font-size="12" font-weight="normal" fill="#9AA7B8">设计说明：操作流程与传统 GA 页面分离；图中按钮为静态示意。</text>
+</svg>

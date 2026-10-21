@@ -1,6 +1,6 @@
 # QRA 资源目录 Grover 脚本实测（2026-09-16）
 
-输入来自 F:/IDEA_project/QRA_resource 根目录的 5 个 Grover_n*.txt 文件，源代码原样提交，在可视化输入区额外指定 :res;。根目录没有 7–9 qubit 测试脚本。
+输入来自 原始 QRA_resource 目录 根目录的 5 个 Grover_n*.txt 文件，源代码原样提交，在可视化输入区额外指定 :res;。根目录没有 7–9 qubit 测试脚本。
 
 环境：Docker Linux x86_64，2 CPU，内存上限 2 GiB，无额外 swap；Java 17，-Xmx768m。通过实际 REST API 生成 Java 结果代码及概率数据，未修改计算代码。
 
@@ -14,9 +14,9 @@
 
 全部通过：按各脚本标记的目标态和迭代次数，用 Grover 振幅放大公式独立计算每个基态的预期概率，最大逐项误差约 2.36e-14。总概率均约为 1，残差均小于 1e-16。OOM 和 OOM kill 计数均为 0。
 
-峰值为同一服务顺序执行至该请求结束时的累计值，不是每个脚本独立启动的峰值。Java 指标取 VmHWM，容器指标取 cgroup memory.peak（含容器缓存等）。首个请求包含冷初始化，不能直接按耗时比较算法规模。6 qubit 请求耗时约 26.87 秒，当前样本中时间开销比内存更突出。
+峰值为同一服务顺序执行至该请求结束时的累计值，采用同一服务进程内的顺序请求。Java 指标取 VmHWM，容器指标取 cgroup memory.peak（含容器缓存等）。首个请求包含冷初始化，不能直接按耗时比较算法规模。6 qubit 请求耗时约 26.87 秒，当前样本中时间开销比内存更突出。
 
-这些结果仅覆盖提供的 2–6 qubit 原始脚本，不能用来推断 9 qubit Grover 的资源要求，也不包含并发负载或宿主系统占用。
+这些结果覆盖提供的 2–6 qubit 原始脚本。9 qubit Grover、并发负载及宿主系统占用需要分别测量。
 
 复现脚本：native/qra/benchmark-resource-scripts.py。挂载约定同 benchmark-memory.py，另将原始资源目录只读挂载到 /resources。
 

@@ -54,9 +54,13 @@ RUN curl --fail --location --retry 5 \
 
 FROM eclipse-temurin:17-jre-jammy
 
-LABEL org.opencontainers.image.title="GAALOP Forge" \
+ARG SOURCE_REVISION
+
+LABEL org.opencontainers.image.source="https://github.com/GAGIS-Lab/gaalop-forge" \
+      org.opencontainers.image.revision="$SOURCE_REVISION" \
+      org.opencontainers.image.title="GAALOP Forge" \
       org.opencontainers.image.description="Geometric algebra compilation, optimization, code generation, and visualization platform" \
-      org.opencontainers.image.version="1.1.0" \
+      org.opencontainers.image.version="1.2.0" \
       org.opencontainers.image.licenses="LGPL-3.0-or-later"
 
 RUN apt-get -o Acquire::Retries=5 update \

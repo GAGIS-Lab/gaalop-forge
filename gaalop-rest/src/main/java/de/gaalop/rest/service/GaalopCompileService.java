@@ -52,6 +52,7 @@ public class GaalopCompileService {
         CompileRequest safeRequest = request == null ? new CompileRequest() : request;
         ScriptInput script = safeRequest.getScript() == null ? new ScriptInput() : safeRequest.getScript();
         CodegenPlugin codegen = resolveCodegen(safeRequest);
+        validateWebCodegen(codegen);
         if (safeRequest.getAlgebraPlugins() == AlgebraPlugin.ALGEBRA_QRA) {
             return compileQra(safeRequest, script, codegen);
         }
@@ -95,6 +96,8 @@ public class GaalopCompileService {
         String algebra = resolveAlgebra(request);
 
         de.gaalop.globalSettings.Plugin globalSettingsPlugin = new de.gaalop.globalSettings.Plugin();
+        // Ganja's Algebra(p,q,r) uses the orthogonal basis, not einf/e0.
+        globalSettingsPlugin.setOutputToNormalBase(codegen == CodegenPlugin.GANJA);
         if (Boolean.TRUE.equals(optimization.getMaxima())) {
             globalSettingsPlugin.setMaximaCommand(resolveMaximaCommand());
             globalSettingsPlugin.setOptMaxima(true);
@@ -132,8 +135,9 @@ public class GaalopCompileService {
         if (options != null && (Boolean.TRUE.equals(options.getCse()) || Boolean.TRUE.equals(options.getMaxima()))) {
             throw new IllegalArgumentException("QRA uses native numeric evaluation; CSE and Maxima are not supported on this path.");
         }
-        if (codegen != CodegenPlugin.JAVA && codegen != CodegenPlugin.CPP && codegen != CodegenPlugin.PYTHON) {
-            throw new IllegalArgumentException("QRA numeric code generation supports JAVA, CPP and PYTHON.");
+        if (codegen == CodegenPlugin.VERILOG || codegen == CodegenPlugin.GANJA || codegen == CodegenPlugin.VISUALIZER || codegen == CodegenPlugin.VIS2D
+                || codegen == CodegenPlugin.GAPP || codegen == CodegenPlugin.GAPP_DEBUGGER || codegen == CodegenPlugin.GAPP_OPENCL) {
+            throw new IllegalArgumentException("This output plugin requires a different optimization or geometric visualization pipeline.");
         }
         boolean visualize = shouldGenerateVisualization(request, codegen);
         de.gaalop.garamon.Plugin plugin = new de.gaalop.garamon.Plugin();
@@ -178,8 +182,8 @@ public class GaalopCompileService {
     private void validateQcaRequest(CompileRequest request, CodegenPlugin codegen) {
         if (request.getAlgebraPlugins() != AlgebraPlugin.ALGEBRA_QCA) return;
         int dimension = request.getAlgebraDimension() == null ? 1 : request.getAlgebraDimension();
-        if (dimension < 1 || dimension > 3) {
-            throw new IllegalArgumentException("QCA currently supports 1 to 3 qubits in the web service.");
+        if (dimension < 1 || dimension > 5) {
+            throw new IllegalArgumentException("QCA currently supports 1 to 5 qubits in the web service.");
         }
         if (codegen == CodegenPlugin.GANJA || codegen == CodegenPlugin.VISUALIZER || codegen == CodegenPlugin.VIS2D) {
             throw new IllegalArgumentException("QCA quantum visualization uses state probabilities, not a geometric visualization code generator.");
@@ -206,30 +210,31 @@ public class GaalopCompileService {
         return new de.gaalop.visualCodeInserter.Plugin().createVisualCodeInserterStrategy();
     }
 
+    private void validateWebCodegen(CodegenPlugin target) {
+        if (target.requiresDesktopUi()) {
+            throw new IllegalArgumentException(target.getPluginName()
+                    + " requires a desktop UI and is not supported by the Web API. "
+                    + "Choose a source-code output or use browser visualization instead.");
+        }
+    }
+
     private CodeGenerator createCodeGenerator(CodegenPlugin target) {
+        validateWebCodegen(target);
         switch (target) {
             case JULIA:
                 return new de.gaalop.julia.Plugin().createCodeGenerator();
-            case VERILOG:
-                return new de.gaalop.codegen_verilog.Plugin().createCodeGenerator();
-            case GAPP_DEBUGGER:
-                return new de.gaalop.gappDebugger.Plugin().createCodeGenerator();
             case CSHARP:
                 return new de.gaalop.csharp.Plugin().createCodeGenerator();
             case RUST:
                 return new de.gaalop.rust.Plugin().createCodeGenerator();
             case JAVA:
                 return new de.gaalop.java.Plugin().createCodeGenerator();
-            case VIS2D:
-                return new de.gaalop.vis2d.Plugin().createCodeGenerator();
             case GAALET_OUTPUT:
                 return new de.gaalop.gaalet.output.Plugin().createCodeGenerator();
             case GAPP:
                 return new de.gaalop.codegenGapp.Plugin().createCodeGenerator();
             case COMPRESSED:
                 return new de.gaalop.compressed.Plugin().createCodeGenerator();
-            case VISUALIZER:
-                return new de.gaalop.visualizer.Plugin().createCodeGenerator();
             case GANJA:
                 return new de.gaalop.ganja.Plugin().createCodeGenerator();
             case GAPP_OPENCL:

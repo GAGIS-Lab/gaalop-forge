@@ -143,11 +143,6 @@
         </dependency>
         <dependency>
             <groupId>de.gaalop</groupId>
-            <artifactId>codegen-verilog</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.gaalop</groupId>
             <artifactId>codegen-rust</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -163,27 +158,12 @@
         </dependency>
         <dependency>
             <groupId>de.gaalop</groupId>
-            <artifactId>gappDebugger</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.gaalop</groupId>
             <artifactId>codegen-gappopencl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>de.gaalop</groupId>
             <artifactId>codegen-ganja</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.gaalop</groupId>
-            <artifactId>codegen-vis2d</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.gaalop</groupId>
-            <artifactId>codegen-visualizer</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

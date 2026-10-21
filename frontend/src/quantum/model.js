@@ -1,11 +1,28 @@
 export const draftKey = "quantum-gaalop-workspace-v1";
+export const defaultAlgebra = "QCA";
+export const algebraSelectionKey = `${draftKey}-algebra`;
 export const algebraModes = {
   QRA: { label: "QRA — Quantum Register Algebra", dimensions: [2, 3, 4, 5, 6, 7, 8, 9], numeric: true, visualization: true },
-  QCA: { label: "QCA — Quantum Computing Algebra", dimensions: [1, 2, 3], numeric: false, visualization: true },
+  QCA: { label: "QCA — Quantum Computing Algebra", dimensions: [1, 2, 3, 4, 5], numeric: false, visualization: true },
   QGA: { label: "quantum bit geometric algebra", dimensions: [], numeric: false, visualization: false }
 };
 export function draftKeyFor(algebra) { return algebra === "QRA" ? draftKey : `${draftKey}-${algebra}`; }
-export function initialForm(algebra = "QRA") {
+// Older drafts have no active-algebra marker. Restore an unambiguous legacy
+// draft; otherwise use QCA while retaining every mode's saved script.
+export function initialAlgebra(storage) {
+  try {
+    const selected = storage.getItem(algebraSelectionKey);
+    if (Object.hasOwn(algebraModes, selected)) return selected;
+    const savedModes = Object.keys(algebraModes).filter(mode => {
+      try {
+        const saved = JSON.parse(storage.getItem(draftKeyFor(mode)) || "null");
+        return saved && typeof saved.optimizeCode === "string";
+      } catch { return false; }
+    });
+    return savedModes.length === 1 ? savedModes[0] : defaultAlgebra;
+  } catch { return defaultAlgebra; }
+}
+export function initialForm(algebra = defaultAlgebra) {
   if (algebra === "QCA") return {
     algebraDimension: 2, codegenPlugins: "JAVA", outputMode: "CODE_AND_VISUALIZATION", functionName: "qca_state",
     optimizeCode: "// QCA: vacuum and computational kets\nj=ei1*ei2;\nId=f1*f1T*f2*f2T;\nket00=Id;\nket11=f1T*f2T*Id;\n?psi=cos(theta/2)*ket00+j*sin(theta/2)*ket11;",
@@ -23,7 +40,7 @@ export function initialForm(algebra = "QRA") {
     variableAssignments: "theta = 1.5707963267948966;", multivectorsVisualized: ":psi;"
   };
 }
-export function buildRequest(form, algebra = "QRA") {
+export function buildRequest(form, algebra = defaultAlgebra) {
   const numeric = algebraModes[algebra].numeric;
   const visualization = algebraModes[algebra].visualization;
   return {

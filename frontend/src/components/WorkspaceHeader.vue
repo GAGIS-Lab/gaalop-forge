@@ -1,10 +1,10 @@
 <template>
   <header class="topbar workspace-header">
-    <div class="topbar-brand">{{ quantum ? 'QuantumGaalopWeb' : 'Gaalop' }}</div>
+    <div class="topbar-brand">{{ quantum ? 'QuantumGAALOP' : 'GAALOPWeb' }}</div>
     <nav class="topbar-nav" aria-label="Main navigation">
       <button class="nav-item nav-button" :class="{ active: activeView === 'home' }" :aria-current="activeView === 'home' ? 'page' : undefined" type="button" @click="$emit('navigate', 'home')">Home</button>
       <button class="nav-item nav-button" :class="{ active: activeView === 'online' }" :aria-current="activeView === 'online' ? 'page' : undefined" type="button" @click="$emit('navigate', 'online')">Online Editing</button>
-      <a class="nav-item" :href="switchUrl">{{ quantum ? 'GaalopWeb' : 'QuantumGaalopWeb' }}</a>
+      <a class="nav-item workspace-switch" :href="switchUrl">{{ quantum ? 'GAALOPWeb' : 'QuantumGAALOP' }}</a>
       <button class="nav-item nav-button" :class="{ active: activeView === 'agent' }" :aria-current="activeView === 'agent' ? 'page' : undefined" type="button" @click="$emit('navigate', 'agent')">GA-CodeAgent</button>
     </nav>
     <div class="topbar-actions">
@@ -21,21 +21,20 @@
 </template>
 
 <script setup>
+import { workspaceUrl } from "../workspaceNavigation.js";
 import { computed } from "vue";
 import { CheckOutlined, CloseCircleOutlined, DownOutlined, UserOutlined } from "@ant-design/icons-vue";
 const props = defineProps({ quantum: Boolean, activeView: { type: String, default: "online" }, statusText: { type: String, default: "Ready to compile" }, error: Boolean });
 defineEmits(["navigate"]);
-const switchUrl = computed(() => {
-  const url = new URL(window.location.href);
-  if (props.quantum) url.searchParams.delete("workspace");
-  else url.searchParams.set("workspace", "quantum");
-  url.hash = "";
-  return url.href;
-});
+const switchUrl = computed(() => workspaceUrl(props.quantum ? "traditional" : "quantum", window.location.href));
 </script>
 
 <style scoped>
-.workspace-header { flex-shrink: 0; }
+.workspace-header { flex-shrink: 0; font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+/* Reserve the longer workspace name so switching keeps every navigation item aligned. */
+.topbar-brand { flex: 0 0 9.5em; }
+.topbar-nav { flex-shrink: 0; }
+.workspace-switch { flex: 0 0 10.5em; text-align: center; }
 .topbar-brand, .nav-item, .last-run-chip, .account-chip { white-space: nowrap; }
 @media (max-width: 1200px) {
   .workspace-header { gap: 12px; }

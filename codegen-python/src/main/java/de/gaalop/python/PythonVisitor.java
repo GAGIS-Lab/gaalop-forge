@@ -4,14 +4,11 @@ import de.gaalop.NonarrayCodeGeneratorVisitor;
 import de.gaalop.StringList;
 import de.gaalop.cfg.*;
 import de.gaalop.dfg.*;
-import java.awt.Color;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
- * This visitor traverses the control and data flow graphs and generates C/C++
- * code.
+ * Generates Python from the optimized control and data flow graphs.
  */
 public class PythonVisitor extends NonarrayCodeGeneratorVisitor {
 
@@ -19,7 +16,9 @@ public class PythonVisitor extends NonarrayCodeGeneratorVisitor {
 
     protected String filename;
 
-    private HashMap<String, LinkedList<Integer>> mvComponents = new HashMap<>();
+    private PythonRuntimeSupport runtime;
+    private final Set<String> initializedArrays = new HashSet<>();
+    private final Set<String> coefficientNames = new HashSet<>();
 
     public PythonVisitor(boolean useDouble, String filename, boolean useArrays) {
         this.filename = filename;
@@ -42,14 +41,17 @@ public class PythonVisitor extends NonarrayCodeGeneratorVisitor {
     public void visit(StartNode node) {
         // At each start, this set need to be cleared
         declaredVariableNames.clear();
+        coefficientNames.clear();
 
         graph = node.getGraph();
-        libraries.add("import numpy as np");
+        libraries.clear();
+        initializedArrays.clear();
+        runtime = new PythonRuntimeSupport(graph, filename.toLowerCase(Locale.ROOT), useArrays);
 
         addLine();
 
         appendIndentation();
-        addCode("def " + filename.toLowerCase() + "(");
+        addCode("def " + filename.toLowerCase(Locale.ROOT) + "(");
 
         // Print parameters
         StringList inputs = graph.getInputs();
@@ -64,29 +66,27 @@ public class PythonVisitor extends NonarrayCodeGeneratorVisitor {
     @Override
     public void visit(AssignmentNode node) {
 
-        String varName = getNewName(node.getVariable());
-
-        if (declaredVariableNames.add(varName) && useArrays) {
-            varName = node.getVariable().getName();
-            addLine(varName + " = np.zeros(" + node.getGraph().getAlgebraDefinitionFile().blades2.length + ")");
-        }
-
-        appendIndentation();
-        node.getVariable().accept(this);
-        addCode(" = ");
-        node.getValue().accept(this);
-
-        // Add blades in comment
-        if (useArrays && node.getVariable() instanceof MultivectorComponent) {
-            addCode(" # ");
-            MultivectorComponent component = (MultivectorComponent) node.getVariable();
-
-            addCode(graph.getBladeString(component));
-
-            if (!mvComponents.containsKey(component.getName()))
-                mvComponents.put(component.getName(), new LinkedList<Integer>());
-
-            mvComponents.get(component.getName()).add(component.getBladeIndex());
+        Variable target = node.getVariable();
+        String name = getNewName(target);
+        // Keep the original set (and its iteration order) for tuple compatibility.
+        declaredVariableNames.add(name);
+        if (target instanceof MultivectorComponent) coefficientNames.add(name);
+        boolean arrayComponent = useArrays && target instanceof MultivectorComponent;
+        if (arrayComponent) {
+            String array = target.getName();
+            if (initializedArrays.add(array)) {
+                addLine(array + " = " + runtime.numpy() + ".zeros(" + graph.getAlgebraDefinitionFile().blades2.length + ")");
+            }
+            appendIndentation();
+            addCode(array + " = " + runtime.setComponent() + "(" + array + ", "
+                    + ((MultivectorComponent) target).getBladeIndex() + ", ");
+            node.getValue().accept(this);
+            addCode(") # " + graph.getBladeString((MultivectorComponent) target));
+        } else {
+            appendIndentation();
+            target.accept(this);
+            addCode(" = ");
+            node.getValue().accept(this);
         }
 
         addCode('\n');
@@ -105,32 +105,20 @@ public class PythonVisitor extends NonarrayCodeGeneratorVisitor {
 
     @Override
     public void visit(EndNode node) {
-        super.visit(node);
-
-        if (useArrays) {
-            appendIndentation();
-            addCode("return " + graph.getOutputs().join());
+        if (graph.getOutputs().isEmpty()) {
+            for (String text : graph.getInsertionTexts()) code.insert(0, text + newline);
+            addLine("return None");
+        } else {
+            super.visit(node);
+            if (useArrays) addLine("return " + graph.getOutputs().join());
         }
 
-        // Insert libraries at script start
-        if (!libraries.isEmpty()) {
-            LinkedList<String> libs = new LinkedList<>(libraries);
-            libs.sort(new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    return o2.compareTo(o1);
-                }
-            });
-
-            for (String lib: libs) {
-                code.insert(0, lib+"\n");
-            }
-
-            String text = code.toString();
-            if (text.contains("sin(") || text.contains("cos(")) {
-                code.insert(0, "from math import sin, cos\n");
-            }
-        }
+        List<String> imports = new ArrayList<>(libraries);
+        Collections.sort(imports);
+        StringBuilder preamble = new StringBuilder();
+        for (String library : imports) preamble.append(library).append('\n');
+        preamble.append(runtime.render());
+        code.insert(0, preamble);
     }
 
     @Override
@@ -141,19 +129,14 @@ public class PythonVisitor extends NonarrayCodeGeneratorVisitor {
 
     @Override
     public void visit(MathFunctionCall mathFunctionCall) {
-        libraries.add("import math");
-        String funcName;
-        switch (mathFunctionCall.getFunction()) {
-            case ABS:
-                funcName = "abs";
-                break;
-            case SQRT:
-                funcName = "math.sqrt";
-                break;
-            default:
-                funcName = mathFunctionCall.getFunction().toString().toLowerCase();
+        if (mathFunctionCall.getFunction() == MathFunction.INVERT) {
+            // Inversion reaches this scalar backend only after GA lowering.
+            addCode("(1.0 / (");
+            mathFunctionCall.getOperand().accept(this);
+            addCode("))");
+            return;
         }
-        addCode(funcName);
+        addCode(runtime.math(mathFunctionCall.getFunction()));
         addCode('(');
         mathFunctionCall.getOperand().accept(this);
         addCode(')');
@@ -177,9 +160,9 @@ public class PythonVisitor extends NonarrayCodeGeneratorVisitor {
             Multiplication m = new Multiplication(exponentiation.getLeft(), exponentiation.getLeft());
             m.accept(this);
         } else {
-            addCode("pow(");
+            addCode("(");
             exponentiation.getLeft().accept(this);
-            addCode(',');
+            addCode(") ** (");
             exponentiation.getRight().accept(this);
             addCode(')');
         }
@@ -199,8 +182,16 @@ public class PythonVisitor extends NonarrayCodeGeneratorVisitor {
     }
 
     @Override
+    protected String GetVariableNameFromBladeVariable(String variable) {
+        // Scalar CSE temporaries need not contain a blade-name separator.
+        return coefficientNames.contains(variable) ? super.GetVariableNameFromBladeVariable(variable) : "";
+    }
+
+    @Override
     protected void addReturnType(List<String> returnTypes) {
-        libraries.add("from typing import Tuple");
+        if (returnTypes.size() != 1 || returnTypes.stream().anyMatch(type -> type.contains("Tuple["))) {
+            libraries.add("from typing import Tuple");
+        }
 
         // Add brackets if tuples are used
         String typeString = String.join(", ", returnTypes);

@@ -4,7 +4,7 @@
 
 ## 来源与改动
 
-- 来源：本机 `F:/IDEA_project/Gaalop_QRA` 的 garamon Java 模块，以及 `F:/IDEA_project/QRA_resource` 中的代数资源、Grover 脚本、Garamon/Eigen 和 Qra7Project 桥接源码。
+- 来源：本机 `F:/IDEA_project/Gaalop_QRA` 的 garamon Java 模块，以及 `原始 QRA_resource 目录` 中的代数资源、Grover 脚本、Garamon/Eigen 和 Qra7Project 桥接源码。
 - 新增 Maven garamon 模块，供 REST 使用，不依赖 gui。
 - 保留 QRA2–6 原始定义和宏，按相同全正度规与基底规则补齐 QRA7–9；不搬入预计算乘积表。QRA 的代数维度为 2n+2。
 - 原生库识别 2–9，按 Windows/Linux x86_64 加载，并检查库返回的维度和系数数量。
@@ -45,7 +45,7 @@
 本次构建与测试输出保存在 `native/qra/target`（Git 忽略），全量清理或重新克隆后需重新构建。
 
 Windows 与 Linux 原生库各通过 8 项 CTest；Docker Java/JNA 链路通过 8 项 JUnit 检查。
-`mvn -o clean test -Dgaalop.garamon.nativeDir=F:/IDEA_project/Gaalop/native/qra/target/install` 全工程回归通过：230 项测试，0 失败、0 错误、0 跳过。
+`mvn -o clean test -Dgaalop.garamon.nativeDir=native/qra/target/install` 全工程回归通过：230 项测试，0 失败、0 错误、0 跳过。
 完整构建日志与测试日志分别位于 `native/qra/target/windows-test.log`、`native/qra/target/docker/test.log`、`native/qra/target/docker/java-test.log` 和 `native/qra/target/full-reactor-test.log`。
 
 双平台库包：`native/qra/target/qra-native-x86_64.zip`，内附 SHA256.json。解压到运行环境的原生库目录后，以 JVM 参数 `-Dgaalop.garamon.nativeDir=<解压目录>` 指定位置。库包没有自动部署到现有服务。

@@ -1,6 +1,7 @@
 package de.gaalop.rest.api;
 
 import jakarta.servlet.ServletContext;
+import de.gaalop.rest.dto.CodegenPlugin;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Info;
@@ -15,6 +16,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 public class OpenApiConfig {
@@ -179,6 +184,8 @@ public class OpenApiConfig {
             return;
         }
 
+        restrictWebCodeGenerators(openApi);
+
         descriptions.forEach((schemaName, fieldDescriptions) -> {
             Schema<?> schema = openApi.getComponents().getSchemas().get(schemaName);
             if (schema == null) {
@@ -200,13 +207,36 @@ public class OpenApiConfig {
         });
     }
 
+    private void restrictWebCodeGenerators(OpenAPI openApi) {
+        Set<String> desktopTargets = Arrays.stream(CodegenPlugin.values())
+                .filter(CodegenPlugin::requiresDesktopUi)
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+        var schemas = openApi.getComponents().getSchemas();
+        filterCodegenEnum(schemas.get("CodegenPlugin"), desktopTargets);
+        Schema<?> request = schemas.get("CompileRequest");
+        if (request != null && request.getProperties() != null
+                && request.getProperties().get("codegenPlugins") instanceof Schema<?> codegen) {
+            filterCodegenEnum(codegen, desktopTargets);
+        }
+    }
+
+    private <T> void filterCodegenEnum(Schema<T> schema, Set<String> desktopTargets) {
+        if (schema == null || schema.getEnum() == null) {
+            return;
+        }
+        var values = new ArrayList<>(schema.getEnum());
+        values.removeIf(value -> desktopTargets.contains(String.valueOf(value)));
+        schema.setEnum(values);
+    }
+
     private Map<String, Map<String, String>> englishSchemaDescriptions() {
         return Map.of(
                 "CompileRequest", Map.of(
                         "_type", "GAALOPScript compilation request.",
                         "algebraPlugins", "Algebra space plugin.",
-                        "algebraDimension", "QCA qubit count, 1 to 3; defaults to 1. Ignored for fixed algebras.",
-                        "codegenPlugins", "Target code generator.",
+                        "algebraDimension", "QCA qubit count, 1 to 5; defaults to 1. Ignored for fixed algebras.",
+                        "codegenPlugins", "Web-supported code generator. Desktop UI plugins are unavailable.",
                         "outputMode", "Controls whether code, visualization, or both are returned.",
                         "visualizationEnabled", "Enables visualization output.",
                         "optimization", "Optimization settings.",
@@ -239,7 +269,7 @@ public class OpenApiConfig {
                 "CompileRequest", Map.of(
                         "_type", "GAALOPScript 编译请求。",
                         "algebraPlugins", "几何代数空间插件。",
-                        "codegenPlugins", "目标代码生成器。",
+                        "codegenPlugins", "支持 Web 的代码生成器，不提供桌面 GUI 插件。",
                         "outputMode", "控制返回代码、可视化结果，或两者都返回。",
                         "visualizationEnabled", "是否启用可视化输出。",
                         "optimization", "优化配置。",
@@ -272,8 +302,8 @@ public class OpenApiConfig {
                 "CompileRequest", Map.of(
                         "_type", "GAALOPScript-Kompilierungsanfrage.",
                         "algebraPlugins", "Algebra-Raum-Plugin.",
-                        "algebraDimension", "QCA-Qubitanzahl, 1 bis 3; Standardwert 1. Bei festen Algebren ignoriert.",
-                        "codegenPlugins", "Codegenerator für die Zielsprache.",
+                        "algebraDimension", "QCA-Qubitanzahl, 1 bis 5; Standardwert 1. Bei festen Algebren ignoriert.",
+                        "codegenPlugins", "Web-kompatibler Codegenerator; Desktop-GUI-Plugins sind nicht verfügbar.",
                         "outputMode", "Steuert, ob Code, Visualisierung oder beides zurückgegeben wird.",
                         "visualizationEnabled", "Aktiviert die Visualisierungsausgabe.",
                         "optimization", "Optimierungseinstellungen.",

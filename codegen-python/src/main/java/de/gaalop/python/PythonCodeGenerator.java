@@ -20,8 +20,9 @@ public class PythonCodeGenerator extends DefaultCodeGenerator {
         PythonVisitor visitor = new PythonVisitor(plugin.getUseDouble(), generateFilename(in).split("\\.")[0], plugin.getUseArrays());
         try {
             in.accept(visitor);
-        } catch (Throwable error) {
+        } catch (RuntimeException error) {
             plugin.notifyError(error);
+            throw error; // Never return a truncated program as a successful export.
         }
         return visitor.getCode();
     }

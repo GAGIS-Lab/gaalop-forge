@@ -34,3 +34,4 @@ original.cpp
 **/.env
 **/.env.*
 **/*-prompt.txt
+frontend/dist-sites

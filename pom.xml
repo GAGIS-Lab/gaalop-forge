@@ -19,7 +19,6 @@
         <module>globalSettings</module>
 
         <module>visualCodeInserter</module>
-        <module>visualCodeInserter2d</module>
         <module>ganjaVisualCodeInserter</module>
 
         <!-- algebra -->
@@ -39,31 +38,41 @@
         <module>codegen-gapp</module>
         <module>codegen-gappopencl</module>
         <module>codegen-compressed</module>
-        <module>codegen-verilog</module>
         <module>codegen-latex</module>
+        <!-- Shared math used by testbenchTbaGapp; excluded from the REST runtime. -->
         <module>codegen-visualizer</module>
 	<module>codegen-rust</module>
 	<module>codegen-mathematica</module>
 	<module>codegen-julia</module>
         <module>gaalet</module>
-        <module>codegen-vis2d</module>
-        <module>gappDebugger</module>
         <module>codegen-ganja</module>
         <module>codegen-matlab</module>
         <module>codegen-python</module>
         
 	<!-- interface -->
-        <module>starter</module>
         <module>cli</module>
-        <module>gui</module>
         <module>gaalop-rest</module>
 
         <!-- testbenches -->
         <module>testbenchTbaGapp</module>
 
-        <!-- distribution -->
-        <module>distribution</module>
     </modules>
+
+    <!-- Desktop entry points and plugins are opt-in; the default build targets the web. -->
+    <profiles>
+        <profile>
+            <id>desktop</id>
+            <modules>
+                <module>visualCodeInserter2d</module>
+                <module>codegen-verilog</module>
+                <module>codegen-vis2d</module>
+                <module>gappDebugger</module>
+                <module>starter</module>
+                <module>gui</module>
+                <module>distribution</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <!--
              All submodules should be built for the Java 6 platform.
