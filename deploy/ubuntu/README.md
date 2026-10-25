@@ -2,7 +2,7 @@
 
 ## 运行方式
 
-集成镜像在容器内运行 Nginx、Java 和 Maxima，公开 `/gaalop/`、`/quantumgaalop/` 和根 `/api/`。使用 `docker compose up -d` 启动已发布的 `gagislab/gaalop-forge:1.2.0`。
+集成镜像在容器内运行 Nginx、Java 和 Maxima，公开 `/gaalop/`、`/quantumgaalop/` 和根 `/api/`。使用 `docker compose up -d` 启动已发布的 `gagislab/gaalop-forge:1.2.1`。
 
 现有服务器采用独立 Java 服务：`/home/GAALOP/gaalop-rest-1.0.0.jar`，端口 8080，上下文 `/gaalop`。Nginx 分别从 `/var/www/gaalop/` 和 `/var/www/quantumgaalop/` 提供两个网站，转发到 `/gaalop/api/`。Hub 使用独立服务与路由。
 

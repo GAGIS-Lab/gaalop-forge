@@ -5,7 +5,7 @@ FROM gagislab/gaalop-forge@sha256:43c7f3e487b8762da571a3b3586312e62a5eba20901dcb
 
 USER root
 ARG SOURCE_REVISION
-LABEL org.opencontainers.image.version="1.2.0" \
+LABEL org.opencontainers.image.version="1.2.1" \
       org.opencontainers.image.source="https://github.com/GAGIS-Lab/gaalop-forge" \
       org.opencontainers.image.revision="$SOURCE_REVISION"
 COPY --from=qra /native/ /app/nativeLibraries/garamon/

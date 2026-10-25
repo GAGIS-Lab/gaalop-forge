@@ -55,9 +55,11 @@ public class GAPPOpenCLVisitor extends de.gaalop.gapp.visitor.CFGGAPPVisitor
         if(gpcMetaInfo && !destMv.startsWith(GAPPOpenCLCodeGenerator.tempMv))
             result.append("//#pragma gpc multivector ").append(destMv).append("\n");
 
-        printOpenCLVectorType(computeNearestOpenCLVectorSize(mvSizes.get(destMv)));
+        // An entirely zero multivector has no stored coefficients, but still
+        // needs a valid initialized scalar representation. Vector padding is zero too.
+        printOpenCLVectorType(computeNearestOpenCLVectorSize(Math.max(1, mvSizes.get(destMv))));
         result.append(" ");
-        result.append(destMv).append(";\n");
+        result.append(destMv).append(" = 0.0f;\n");
         mvBladeMap.put(destMv,new HashMap<Integer,String>());
 
         return null;
@@ -90,7 +92,7 @@ public class GAPPOpenCLVisitor extends de.gaalop.gapp.visitor.CFGGAPPVisitor
     }
 
     protected String getBladeCoeff(String mv,int blade) {
-        return mv + ((mvSizes.get(mv) == 1) ? "" : (".s" + getOpenCLIndex(blade)));
+        return mv + ((mvSizes.get(mv) <= 1) ? "" : (".s" + getOpenCLIndex(blade)));
     }
     
     protected static String formatBladeName(final String bladeName) {
@@ -370,7 +372,7 @@ public class GAPPOpenCLVisitor extends de.gaalop.gapp.visitor.CFGGAPPVisitor
             
             result.append(bladeCoeff);
             result.append(" = ");
-            result.append(val.toString());
+            result.append(val.prettyPrint());
             result.append(";\n");
 
             mvBladeMap.get(destMv).put(gappAssignMv.getSelectors().get(selCount++).getIndex(),bladeCoeff);

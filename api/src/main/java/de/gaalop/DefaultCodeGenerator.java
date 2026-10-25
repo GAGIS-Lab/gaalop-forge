@@ -22,6 +22,7 @@ public abstract class DefaultCodeGenerator implements CodeGenerator {
 
     @Override
     public Set<OutputFile> generate(ControlFlowGraph graph) throws CodeGeneratorException {
+        if (graph.tbaOptimized) ZeroOutputRestorer.restore(graph);
         String code = generateCode(graph);
 
         String filename = generateFilename(graph);

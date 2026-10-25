@@ -1,11 +1,11 @@
 # Docker 发布构建
 
-应用镜像为 `gagislab/gaalop-forge:1.2.0`，目标平台 Linux x86_64。
+应用镜像为 `gagislab/gaalop-forge:1.2.1`，目标平台 Linux x86_64。
 
 ## 源码构建
 
 ```bash
-docker build --platform linux/amd64 -t gagislab/gaalop-forge:1.2.0 .
+docker build --platform linux/amd64 -t gagislab/gaalop-forge:1.2.1 .
 ```
 
 Dockerfile 分别构建 QRA、Java、前端和 Maxima，再组装运行环境。QRA 使用 Ubuntu 22.04，与运行环境的 ABI 对齐。`UBUNTU_MIRROR` 构建参数可指定 Ubuntu 镜像源，apt 保留包签名验证。
@@ -27,7 +27,7 @@ context 只包含上述运行文件。原生库通过源码指纹、系统 ABI �
 启动独立测试容器，使用 `--memory 2g --memory-swap 2g` 和回环地址端口。检查健康、两个页面、静态资源、CGA、QCA、QRA 2–9 qubit、生成代码及 Maxima，并记录内存峰值和 OOM 计数。按测试脚本的负载解释容量数据。
 
 ```bash
-docker push gagislab/gaalop-forge:1.2.0
+docker push gagislab/gaalop-forge:1.2.1
 ```
 
 推送后核对仓库摘要。源码提交使用同一版本标签，镜像的 revision 标签指向对应提交。

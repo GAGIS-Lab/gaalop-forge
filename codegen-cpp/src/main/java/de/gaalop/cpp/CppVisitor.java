@@ -70,6 +70,18 @@ public class CppVisitor extends DefaultCodeGeneratorVisitor {
             indentation++;
         } 
 
+        // Output arrays belong to the caller and may contain previous results.
+        // A fresh loop variable also works when a user names an output 'memset'.
+        Set<String> reservedNames = new HashSet<>(graph.getInputs());
+        reservedNames.addAll(graph.getLocals());
+        reservedNames.addAll(graph.getScalars());
+        String outputIndex = "gaalopOutputIndex";
+        for (int suffix = 1; reservedNames.contains(outputIndex); suffix++) outputIndex = "gaalopOutputIndex_" + suffix;
+        for (String output : outputs) {
+            addLine("for (int " + outputIndex + " = 0; " + outputIndex + " < " + bladeCount + "; ++" + outputIndex
+                    + ") " + output + "[" + outputIndex + "] = 0.0;");
+        }
+
         for (String var : graph.getLocals()) 
             if (!outputs.contains(var)) {
                 appendIndentation();

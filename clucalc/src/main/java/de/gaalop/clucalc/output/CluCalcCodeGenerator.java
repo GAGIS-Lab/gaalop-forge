@@ -23,6 +23,7 @@ public class CluCalcCodeGenerator implements CodeGenerator {
 
     @Override
     public Set<OutputFile> generate(ControlFlowGraph in) {
+        if (in.tbaOptimized) de.gaalop.ZeroOutputRestorer.restore(in);
         String code = generateCode(in);
         
         String filename = generateFilename(in);

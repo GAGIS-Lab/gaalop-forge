@@ -62,6 +62,7 @@ public class GanjaCodeGenerator extends DefaultCodeGenerator {
     
     // This method is static, because it is also used from external
     public static String generateCodeStatic(ControlFlowGraph graph, OutputMode outputMode) {
+        de.gaalop.ZeroOutputRestorer.restore(graph);
         //For >=7d switch to graded representation, otherwise default to flat representation
         AlgebraProperties properties = AlgebraProperties.fromSignature(graph.getAlgebraDefinitionFile().getSignature());
         

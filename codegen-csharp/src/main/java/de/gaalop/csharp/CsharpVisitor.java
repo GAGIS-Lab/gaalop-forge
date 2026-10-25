@@ -97,6 +97,12 @@ public class CsharpVisitor extends NonarrayCodeGeneratorVisitor {
             indentation++;
         }
 
+        // Caller-owned output arrays must not retain previous coefficients.
+        if (useArrays && !outputs.isEmpty()) {
+            libraries.add("using System;\n");
+            for (String output : outputs) addLine("global::System.Array.Clear(" + output + ", 0, " + bladeCount + ");");
+        }
+
         // When using arrays, they need to be defined at the start
         if (useArrays) {
             for (String localVariable : graph.getLocals()) {

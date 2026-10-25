@@ -60,7 +60,7 @@ LABEL org.opencontainers.image.source="https://github.com/GAGIS-Lab/gaalop-forge
       org.opencontainers.image.revision="$SOURCE_REVISION" \
       org.opencontainers.image.title="GAALOP Forge" \
       org.opencontainers.image.description="Geometric algebra compilation, optimization, code generation, and visualization platform" \
-      org.opencontainers.image.version="1.2.0" \
+      org.opencontainers.image.version="1.2.1" \
       org.opencontainers.image.licenses="LGPL-3.0-or-later"
 
 RUN apt-get -o Acquire::Retries=5 update \

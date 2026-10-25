@@ -21,6 +21,8 @@ public class GAPPMvSizeVisitor extends de.gaalop.gapp.visitor.CFGGAPPVisitor {
     
     @Override
     public Object visitAssignMv(GAPPAssignMv gappAssignMv, Object arg) {
+        incrementSize(GAPPOpenCLCodeGenerator.getVarName(gappAssignMv.getDestination().getName()),
+                gappAssignMv.getSelectors().size());
         return null;
     }
 

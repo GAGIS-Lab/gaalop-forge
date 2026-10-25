@@ -21,6 +21,7 @@ public class JavaCodeGenerator extends DefaultCodeGenerator {
 
     @Override
     public Set<OutputFile> generate(ControlFlowGraph in) {
+        if (in.tbaOptimized) de.gaalop.ZeroOutputRestorer.restore(in);
         Set<OutputFile> result = new HashSet<OutputFile>();
         String filename = generateFilename(in);
         String code = generateCode(in);

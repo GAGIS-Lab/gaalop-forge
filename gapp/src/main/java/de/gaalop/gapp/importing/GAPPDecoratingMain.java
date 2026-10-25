@@ -69,6 +69,9 @@ public class GAPPDecoratingMain {
         CFGImporterFacade facade = new CFGImporterFacade(plugin);
         facade.importGraph(graph);
 
+        // Restore observable zero outputs before lowering to reset/assign instructions.
+        de.gaalop.ZeroOutputRestorer.restore(graph);
+
         //Transform divisions with constants in multiplications
         ConstantDivisionTransformer.transform(graph);
 

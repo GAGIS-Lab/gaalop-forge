@@ -166,7 +166,8 @@ public abstract class NonarrayCodeGeneratorVisitor extends DefaultCodeGeneratorV
      */
     protected String GetVariableNameFromBladeVariable(String componentVariable) {
         int index = componentVariable.lastIndexOf("_");
-        return componentVariable.substring(0, index);
+        // Scalar CSE temporaries do not carry a blade suffix.
+        return index < 0 ? "" : componentVariable.substring(0, index);
     }
 
     /*

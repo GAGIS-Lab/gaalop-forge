@@ -15,14 +15,14 @@ Both pages share a Spring Boot API. Each page has its own startup module and bro
 
 ## Run with Docker
 
-Version **1.2.0** includes the two workbenches, MATLAB symbolic-array fixes, Python math imports, QCA up to five qubits, and a Web runtime with desktop plugins removed.
+Version **1.2.1** preserves constant-zero outputs across language backends and clears caller-owned output arrays. It includes the two workbenches, MATLAB symbolic arrays, Python numeric math, and QCA up to five qubits.
 
 ```bash
-docker pull gagislab/gaalop-forge:1.2.0
+docker pull gagislab/gaalop-forge:1.2.1
 docker run -d --name gaalop-forge -p 18080:8080 \
   -e GAALOP_SWAGGER_USERNAME=admin \
   -e GAALOP_SWAGGER_PASSWORD=change-me \
-  gagislab/gaalop-forge:1.2.0
+  gagislab/gaalop-forge:1.2.1
 ```
 
 | Service | URL |
@@ -148,7 +148,7 @@ Compile history is opt-in through `GAALOP_COMPILE_HISTORY_ENABLED=true`. History
 | `testbenchTbaGapp/` | Compiler regression tests |
 | `docker/`, `deploy/` | Image assembly and server deployment |
 
-More: [GAALOPScript rules](GAALOPScript_Rules.md), [language reference](docs/gaalopscript-analysis/02-完整语言参考.md), [MATLAB compatibility](docs/matlab-symbolic-codegen.md), [Python compatibility](docs/python-codegen-compatibility.md), [Open/Save](docs/browser-open-save.md), [1.2.0 changes](docs/releases/1.2.0.md).
+More: [GAALOPScript rules](GAALOPScript_Rules.md), [language reference](docs/gaalopscript-analysis/02-完整语言参考.md), [MATLAB compatibility](docs/matlab-symbolic-codegen.md), [Python compatibility](docs/python-codegen-compatibility.md), [Open/Save](docs/browser-open-save.md), [1.2.1 changes](docs/releases/1.2.1.md).
 
 ## Acknowledgments and license
 

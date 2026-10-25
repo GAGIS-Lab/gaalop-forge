@@ -38,6 +38,7 @@ public class RustVisitor extends DefaultCodeGeneratorVisitor {
         code.append(list.join());
 
         code.append(") {\n");
+        for (String output : graph.getOutputs()) code.append("\t").append(output).append(".fill(0.0);\n");
         node.getSuccessor().accept(this);
     }
 
